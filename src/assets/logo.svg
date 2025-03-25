@@ -1,0 +1,24 @@
+<svg width="500" height="150" viewBox="0 0 400 150" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#D32F2F; stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B71C1C; stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="4" dy="4" stdDeviation="4" flood-color="black" flood-opacity="0.7"/>
+    </filter>
+    <style>
+      @keyframes fadeIn {
+        0% { opacity: 0; transform: scale(0.8); }
+        100% { opacity: 1; transform: scale(1); }
+      }
+      text {
+        animation: fadeIn 1.5s ease-in-out forwards;
+      }
+    </style>
+  </defs>
+  <text x="50%" y="50%" font-size="90" font-family="'Arial Black', sans-serif" font-weight="bold"
+        fill="url(#grad1)" text-anchor="middle" dominant-baseline="middle" filter="url(#shadow)">
+    MILIYON
+  </text>
+</svg>
