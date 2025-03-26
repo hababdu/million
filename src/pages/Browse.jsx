@@ -67,62 +67,69 @@ function Browse() {
       ) : filteredProducts.length === 0 ? (
         <p className="text-center text-gray-500">Mahsulotlar topilmadi</p>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
           {filteredProducts.slice(0, limit).map((product) => (
             <div
-              key={product.id}
-              className="rounded-lg shadow-sm overflow-hidden relative"
+            key={product.id}
+            className="flex-shrink-0  w-full bg md:w-48 md:h-64 rounded-lg shadow-inner yarn upgrade react react-dom
+ overflow-hidden  relative " 
             >
-              <button
-                onClick={() => dispatch(toggleLike(product.id))}
-                className="absolute top-2 right-2 text-xl text-red-500"
-              >
-                <FaHeart
-                  className={
-                    likedProducts.includes(product.id)
-                      ? "text-red-600"
-                      : "text-gray-400"
-                  }
-                />
-              </button>
-              <img
-                src={product.thumbnail}
-                alt={product.title}
-                className="w-full h-48 object-cover cursor-pointer"
-                onClick={() => handleNavi(product)} // Click orqali productni full sahifasiga yuborish
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                dispatch(toggleLike(product.id));
+              }}
+              className="absolute top-2 right-2 text-lg z-10"
+            >
+              <FaHeart
+                className={
+                  likedProducts.includes(product.id)
+                    ? "text-red-600"
+                    : "text-gray-300 hover:text-red-400"
+                }
               />
-              <div
-                onClick={() => handleNavi(product)} // Click orqali productni full sahifasiga yuborish
-                className="p-3"
-              >
-                <div className="flex justify-between items-end">
-                  <h3 className="text-lg text-gray-900 font-semibold">
-                    {product.title}
-                  </h3>
-                </div>
-                <p className="text-gray-500 line-through text-sm">{product.price}$</p>
-                <p className="text-green-600 font-semibold">
-                  ${(
-                    product.price *
-                    (1 - product.discountPercentage / 100)
-                  ).toFixed(2)}
-                </p>
+            </button>
 
-                {/* Additional Info */}
-                <div className="mt-3 flex justify-between items-center">
-                  <div className='rounded-full bg-gray-900'>
-                    <img src={Mlogo} className='w-5' alt="" />
-                  </div>
-                  <div className="flex mt-2">
-                    {[...Array(Math.round(product.rating))].map((_, index) => (
-                      <span key={index} className="text-yellow-500 text-sm">
-                        ★
-                      </span>
-                    ))}
-                  </div>
+            <img
+              src={product.thumbnail}
+              alt={product.title}
+              className="w-full  md:h-40 object-cover cursor-pointer"
+              onClick={() => handleNavi(product)}
+            />
+
+            <div
+              onClick={() => handleNavi(product)}
+              className="p-2 cursor-pointer"
+            >
+              <h3 className="text-sm font-medium text-gray-900 line-clamp-2">
+                {product.title}
+              </h3>
+              <div className="flex items-center mt-1">
+                <p className="text-gray-500 line-through text-xs mr-2">
+                  ${product.price}
+                </p>
+                <p className="text-green-600 font-semibold text-sm">
+                  ${(product.price * (1 - product.discountPercentage / 100)).toFixed(2)}
+                </p>
+              </div>
+
+              <div className="flex justify-between items-center mt-2">
+                <div className="rounded-full p-0.5 bg-gray-900">
+                  <img src={Mlogo} className="w-4 h-4" alt="logo" />
+                </div>
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <span
+                      key={i}
+                      className={`text-xs ${i < Math.round(product.rating) ? 'text-yellow-500' : 'text-gray-300'}`}
+                    >
+                      ★
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>
+          </div>
           ))}
         </div>
       )}
