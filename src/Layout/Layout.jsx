@@ -69,8 +69,8 @@ function Layout({ children }) {
   }, [products]);
 
   return (
-    <div className="flex flex-col z-50 min-h-screen bg-gray-100">
-      <header className="bg-gray-800 fixed top-0 left-0 w-full text-white p-1 flex flex-col items-center shadow-lg z-50">
+    <div className="flex flex-col z-50 min-h-screen bg-[#2B2B2B] text-white">
+      <header className="bg-gradient-to-l bg-[#2B2B2B] fixed top-0 left-0 w-full text-white p-1 flex flex-col items-center shadow-lg z-50">
         <div className="flex w-full max-w-7xl justify-between items-center">
           <Link to="/">
             <img src={logo} alt="Logo" className="h-10 md:h-12" />
@@ -178,7 +178,7 @@ function Layout({ children }) {
             {searchQuery && filteredProducts.length > 0 && (
                 <div className="w-full top-full absolute bg-gray-700 z-50 rounded-md p-2 ">
                   <h3 className="text-gray-300 font-semibold">Results:</h3>
-                  <ul className="max-h-60 overflow-y-auto">
+                  <ul className="max-h-120  overflow-y-auto">
                     {Object.entries(groupedProducts).map(([category, products]) => (
                       <li key={category} className="p-2 border-b border-gray-600">
                         <h4 className="text-yellow-300 font-semibold mb-2">{category}</h4>
@@ -204,11 +204,11 @@ function Layout({ children }) {
           </div>
         )}
 
-        <ul className="w-full overflow-x-auto whitespace-nowrap shadow-lg flex gap-2 text-white px-4 py-1">
+        <ul className="w-full overflow-x-auto whitespace-nowrap  flex gap-2 text-white px-4 py-1">
           {categories.map((category) => (
             <li
               key={category}
-              className="bg-gray-700 text-gray-300 px-3 py-1 text-sm rounded-full hover:bg-gray-600 transition cursor-pointer"
+              className="bg-[#A259FF] text-gray-300 px-3 py-1 text-sm rounded-full hover:bg-gray-600 transition cursor-pointer"
               onClick={() => handleCategoryClick(category)}
             >
               {category}
@@ -217,9 +217,9 @@ function Layout({ children }) {
         </ul>
       </header>
 
-      <main className="flex-grow mt-20 p-4">{children}</main>
+      <main className="flex-grow mt-20 ">{children}</main>
 
-      <nav className="fixed bottom-0 w-full bg-gray-800 text-white flex justify-around items-center p-2 shadow-lg border-t border-gray-700 md:hidden">
+      <nav className="fixed bottom-0 w-full z-50 bg-[#2B2B2B] text-white flex justify-around items-center p-2 shadow-lg border-t border-gray-700 md:hidden">
         <Link to="/" className="flex flex-col items-center hover:text-gray-400 transition">
           <HomeIcon className="h-6 w-6" />
           <span className="text-xs">Home</span>

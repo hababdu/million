@@ -73,7 +73,7 @@ function Likes() {
       ) : likedItems.length === 0 ? (
         <p>Sevimli mahsulotlaringiz yo‘q</p>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2  md:grid-cols-3 lg:grid-cols-4 gap-4">
           {likedItems.map((product) => {
             const isLiked = likedProducts.includes(product.id);
             const discountedPrice = (
@@ -82,61 +82,50 @@ function Likes() {
 
             return (
               <div
-                key={product.id}
-                className="relative max-w-xs  rounded-lg shadow-lg cursor-pointer"
-              >
-                <button
-                  onClick={() => confirmUnlike(product)}
-                  className="absolute z-0 top-2 right-2 text-yellow-400 text-xl"
-                >
-                  {isLiked ? <FaHeart /> : <FaRegHeart />}
-                </button>
-                <img
-                  onClick={() => {
-                    handleNavi(product);
-                  }}
-                  src={product.thumbnail}
-                  alt={product.title}
-                  className="rounded-md w-full h-40 object-cover"
-                />
+  key={product.id}
+  className="relative bg-[#3A3A3A] max-w-xs rounded-lg shadow-lg cursor-pointer p-2"
+>
+  {/* Like tugmasi */}
+  <button
+    onClick={() => confirmUnlike(product)}
+    className="absolute top-2 right-2 text-yellow-400 text-lg z-10"
+  >
+    {isLiked ? <FaHeart /> : <FaRegHeart />}
+  </button>
 
-                <div
-                  onClick={() => {
-                    handleNavi(product);
-                  }}
-                  className="flex justify-between items-end p-2"
-                >
-                  <div>
-                    <h2 className="text-sm md:text-base lg:text-lg text-gray-700 font-semibold mt-2">
-                      {product.title}
-                    </h2>
-                    <p className="text-gray-500 text-xs md:text-sm lg:text-base">
-                      {product.category}
-                    </p>
-                    <p className="text-gray-700 text-xs md:text-sm lg:text-base">
-                      {product.brand}
-                    </p>
-                    <div className="mt-1">
-                      <p className="text-gray-400 line-through text-xs md:text-sm lg:text-base">
-                        ${product.price}
-                      </p>
-                      <p className="text-red-600 font-semibold text-sm md:text-base lg:text-lg">
-                        ${discountedPrice}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center mt-1">
-                    {[...Array(Math.round(product.rating))].map((_, i) => (
-                      <span
-                        key={i}
-                        className="text-yellow-500 text-xs md:text-sm lg:text-base"
-                      >
-                        ★
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
+  {/* Mahsulot rasmi */}
+  <img
+    onClick={() => handleNavi(product)}
+    src={product.thumbnail}
+    alt={product.title}
+    className="rounded-md w-full h-36 md:h-40 object-cover"
+  />
+
+  {/* Mahsulot ma'lumotlari */}
+  <div onClick={() => handleNavi(product)} className="p-2">
+    <h2 className="text-xs md:text-sm lg:text-base text-white font-semibold line-clamp-2">
+      {product.title}
+    </h2>
+    <p className="text-gray-500 text-xs md:text-sm">{product.category}</p>
+    <p className="text-white text-xs md:text-sm">{product.brand}</p>
+
+    {/* Narx va chegirma */}
+    <div className="flex items-center justify-between mt-1">
+      <p className="text-gray-400 line-through text-xs md:text-sm">${product.price}</p>
+      <p className="text-green-700 font-semibold text-sm md:text-base">
+        ${discountedPrice}
+      </p>
+    </div>
+
+    {/* Reyting yulduzlari */}
+    <div className="flex mt-1">
+      {[...Array(Math.round(product.rating))].map((_, i) => (
+        <span key={i} className="text-yellow-500 text-xs md:text-sm">★</span>
+      ))}
+    </div>
+  </div>
+</div>
+
             );
           })}
         </div>
@@ -147,7 +136,7 @@ function Likes() {
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
             <h3 className="text-lg font-semibold">Mahsulotni o‘chirish</h3>
-            <p className="text-gray-700 mt-2">
+            <p className="text-white mt-2">
               "{selectedProduct.title}" ni sevimlilardan o‘chirmoqchimisiz?
             </p>
             <div className="mt-4 flex justify-center space-x-4">

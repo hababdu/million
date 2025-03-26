@@ -9,14 +9,44 @@ import Mlogo from '../assets/mlogo.svg';
 
 // Skeleton Loader for horizontal scrolling
 const SkeletonLoader = () => (
-  <div className="flex-shrink-0 w-32 h-56 md:w-48 md:h-64 rounded-lg shadow-sm overflow-hidden relative animate-pulse bg-gray-200">
-    <div className="w-full h-32 md:h-40 bg-gray-300"></div>
-    <div className="p-2">
-      <div className="h-4 bg-gray-400 mb-2 rounded"></div>
-      <div className="h-3 bg-gray-400 mb-1 rounded"></div>
-      <div className="h-3 bg-gray-400 rounded w-3/4"></div>
+    <div  className="w-full" >
+      <div className="flex justify-between items-center py-2 px-1">
+        <div className="w-20 h-4 bg-gray-700 rounded animate-pulse"></div>
+        <div className="w-16 h-4 bg-gray-700 rounded animate-pulse"></div>
+      </div>
+  
+      <div className="relative">
+        <div className="flex space-x-1 overflow-x-auto hide-scrollbar">
+          
+            <div
+              className="flex-shrink-0 w-28 h-50 md:w-48 md:h-64 rounded-lg shadow-sm overflow-hidden relative bg-[#3A3A3A] text-white"
+            >
+              <div className="absolute top-2 right-2 w-6 h-6 bg-gray-700 rounded-full animate-pulse"></div>
+  
+              <div className="w-full h-28 md:h-40 bg-gray-700 animate-pulse"></div>
+  
+              <div className="p-1">
+                <div className="w-full h-4 bg-gray-700 rounded animate-pulse mb-1"></div>
+                <div className="w-3/4 h-3 bg-gray-600 rounded animate-pulse mb-1"></div>
+  
+                <div className="flex items-center mt-1">
+                  <div className="w-10 h-3 bg-gray-700 rounded animate-pulse mr-1"></div>
+                  <div className="w-12 h-4 bg-gray-600 rounded animate-pulse"></div>
+                </div>
+  
+                <div className="flex justify-between items-center mt-2">
+                  <div className="w-5 h-5 bg-gray-800 rounded-full animate-pulse"></div>
+                  <div className="flex space-x-1">
+                   
+                      <div  className="w-3 h-3 bg-gray-700 rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
     </div>
-  </div>
+  
 );
 
 const shuffleArray = (array) => {
@@ -88,8 +118,8 @@ function Home() {
   };
 
   return (
-    <div className="mx-auto text-gray-900  ">
-      <h1 className="text-2xl sm:text-3xl font-bold text-gray-950 ">Mahsulotlar</h1>
+    <div className="mx-auto text-white pl-2   ">
+      <h1 className="text-2xl sm:text-3xl font-bold text-white ">Mahsulotlar</h1>
 
       {loading ? (
         <div className="flex space-x-1 overflow-x-auto pb-4 hide-scrollbar">
@@ -103,7 +133,8 @@ function Home() {
         Object.keys(shuffledProducts).map((category) => (
           <div key={category} className=" w-full" id={category}>
             <div className="flex justify-between items-center py-2  px-1">
-              <h2 className="text-xl font-bold text-gray-800">{category}</h2>
+            <h2 className="text-xs md:text-sm font-semibold text-white">{category}</h2>
+
               <button
                 onClick={() => handleMoreClick(category)}
                 className="text-sm px-1 py-1 "
@@ -117,7 +148,7 @@ function Home() {
                 {shuffledProducts[category].slice(0, 10).map((product) => (
                   <div
                     key={product.id}
-                    className="flex-shrink-0 w-32 h-55 md:w-48 md:h-64 rounded-lg shadow-sm overflow-hidden relative bg-white"
+                    className="flex-shrink-0 w-28 h-50 md:w-48 md:h-64 rounded-lg shadow-sm overflow-hidden relative bg-[#3A3A3A] text-white " 
                   >
                     <button
                       onClick={(e) => {
@@ -142,38 +173,35 @@ function Home() {
                       onClick={() => handleNavi(product)}
                     />
 
-                    <div
-                      onClick={() => handleNavi(product)}
-                      className="p-2 cursor-pointer"
-                    >
-                      <h3 className="text-sm font-medium text-gray-900 line-clamp-2">
-                        {product.title}
-                      </h3>
-                      <div className="flex items-center mt-1">
-                        <p className="text-gray-500 line-through text-xs mr-2">
-                          ${product.price}
-                        </p>
-                        <p className="text-green-600 font-semibold text-sm">
-                          ${(product.price * (1 - product.discountPercentage / 100)).toFixed(2)}
-                        </p>
-                      </div>
-
-                      <div className="flex justify-between items-center mt-2">
-                        <div className="rounded-full p-0.5 bg-gray-900">
-                          <img src={Mlogo} className="w-4 h-4" alt="logo" />
-                        </div>
-                        <div className="flex">
-                          {[...Array(5)].map((_, i) => (
-                            <span
-                              key={i}
-                              className={`text-xs ${i < Math.round(product.rating) ? 'text-yellow-500' : 'text-gray-300'}`}
-                            >
-                              ★
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+<div onClick={() => handleNavi(product)} className="p-1 cursor-pointer">
+                   <h3 className="text-xs font-medium line-clamp-2">{product.title}</h3>
+                   <div className="flex items-center mt-1">
+                     <p className="text-gray-300 line-through text-[10px] mr-1">
+                       ${product.price}
+                     </p>
+                     <p className="text-green-500 font-semibold text-xs">
+                       ${(product.price * (1 - product.discountPercentage / 100)).toFixed(2)}
+                     </p>
+                   </div>
+               
+                   <div className="flex justify-between items-center mt-2">
+                     <div className="rounded-full p-0.5 bg-gray-800">
+                       <img src={Mlogo} className="w-3 h-3" alt="logo" />
+                     </div>
+                     <div className="flex">
+                       {[...Array(5)].map((_, i) => (
+                         <span
+                           key={i}
+                           className={`text-[10px] ${
+                             i < Math.round(product.rating) ? "text-yellow-400" : "text-gray-500"
+                           }`}
+                         >
+                           ★
+                         </span>
+                       ))}
+                     </div>
+                   </div>
+                 </div>
                   </div>
                 ))}
               </div>
