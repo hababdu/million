@@ -6,6 +6,7 @@ import { addViewedProduct } from '../redux/productSliceHistory';
 import { toggleLike } from "../redux/likeSlice";
 import { FaHeart } from "react-icons/fa";
 import Mlogo from '../assets/mlogo.svg';
+import Logout from "./Login";
 
 // Skeleton Loader for horizontal scrolling
 const SkeletonLoader = () => (
@@ -59,11 +60,19 @@ const shuffleArray = (array) => {
 };
 
 function Home() {
-  const dispatch = useDispatch();
+
+   const { user, loading } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/login"); // Foydalanuvchi yo‘q bo‘lsa, login sahifasiga yo‘naltiramiz
+    }
+  }, [user, loading, navigate]);
+  const dispatch = useDispatch();
   const location = useLocation();
   
-  const { products, loading, error } = useSelector((state) => state.products);
+  const { products,  error } = useSelector((state) => state.products);
   const { likedProducts } = useSelector((state) => state.likes);
 
   const [categoryProducts, setCategoryProducts] = useState({});
@@ -148,7 +157,7 @@ function Home() {
                 {shuffledProducts[category].slice(0, 10).map((product) => (
                   <div
                     key={product.id}
-                    className="flex-shrink-0 w-28 h-50 md:w-48 md:h-64 rounded-lg shadow-sm overflow-hidden relative bg-[#3A3A3A] text-white " 
+                    className="flex-shrink-0 w-28 md:w-48 md:h-64 rounded-lg shadow-sm overflow-hidden relative bg-[#3A3A3A] text-white " 
                   >
                     <button
                       onClick={(e) => {
@@ -174,7 +183,7 @@ function Home() {
                     />
 
 <div onClick={() => handleNavi(product)} className="p-1 cursor-pointer">
-                   <h3 className="text-xs font-medium line-clamp-2">{product.title}</h3>
+                   <h3 className="text-xs font-medium truncate line-clamp-2">{product.title}</h3>
                    <div className="flex items-center mt-1">
                      <p className="text-gray-300 line-through text-[10px] mr-1">
                        ${product.price}
