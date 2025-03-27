@@ -7,7 +7,7 @@ import Store from "./pages/Store";
 import OrderHistory from "./pages/Order History";
 import Browse from "./pages/Browse";
 import Likes from "./pages/Likes";
-import Cards from "./pages/Cards";
+import Cards from "./pages/cards";
 import Profile from "./pages/Profile";
 import Fulcontent from "./pages/Fulcontent";
 import Register from "./pages/register"; // Register faylini qo'shdik
