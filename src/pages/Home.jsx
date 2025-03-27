@@ -59,6 +59,7 @@ const shuffleArray = (array) => {
   return newArray;
 };
 
+
 function Home() {
 
    const { user, loading } = useSelector((state) => state.auth);
@@ -219,7 +220,7 @@ function Home() {
         ))
       )}
 
-      <style jsx>{`
+      <style >{`
         .hide-scrollbar {
           -ms-overflow-style: none;
           scrollbar-width: none;

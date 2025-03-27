@@ -1,13 +1,22 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { Provider } from "react-redux";
-import store from "./redux/store"; // Redux store'ni import qiling
-import App from "./App";
-import "./index.css";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from './redux/store'; // Named import qilish
+import App from './App';
+import './index.css';
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
+const Loading = () => (
+  <div className="loading-spinner">
+    <div className="spinner"></div>
+  </div>
+);
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <Provider store={store}>
-    <App />
-  </Provider>
+    <Provider store={store}>
+      <PersistGate loading={<Loading />} persistor={persistor}>
+        <App />
+      </PersistGate>
+    </Provider>
 );

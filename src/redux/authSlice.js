@@ -1,61 +1,140 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { auth, googleProvider } from "../firebaseConfig/firebaseConfig";
 import { 
-  signInWithPopup, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signOut 
+  auth, 
+  googleProvider,
+  db
+} from "../firebaseConfig/firebaseConfig";
+import { 
+  setPersistence, 
+  browserLocalPersistence,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  updateProfile,
+  onAuthStateChanged
 } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 
-// 🔹 Ro‘yxatdan o‘tish funksiyasi
+// Foydalanuvchi ma'lumotlarini ajratib olish
+const extractUserData = (user) => ({
+  uid: user.uid,
+  email: user.email,
+  displayName: user.displayName,
+  photoURL: user.photoURL,
+  emailVerified: user.emailVerified,
+  providerId: user.providerId,
+  metadata: {
+    creationTime: user.metadata.creationTime,
+    lastSignInTime: user.metadata.lastSignInTime
+  }
+});
+
+// Auth holatini tekshirish
+export const checkAuthState = createAsyncThunk(
+  "auth/checkAuthState",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+      
+      return new Promise((resolve) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+          if (user) {
+            dispatch(setUser(extractUserData(user)));
+          }
+          dispatch(setAuthChecked(true));
+          unsubscribe();
+          resolve();
+        });
+      });
+    } catch (error) {
+      console.error("Auth xatosi:", error);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Ro'yxatdan o'tish
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
-  async ({ email, password }, { rejectWithValue }) => {
+  async ({ username, email, password }, { rejectWithValue }) => {
     try {
+      await setPersistence(auth, browserLocalPersistence);
+      
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      return userCredential.user;
+      const user = userCredential.user;
+
+      await updateProfile(user, { displayName: username });
+      
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        email: user.email,
+        displayName: username,
+        createdAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString()
+      });
+
+      return extractUserData(user);
     } catch (error) {
       return rejectWithValue(error.message);
     }
   }
 );
 
-// 🔹 Email va parol bilan kirish funksiyasi
+// Kirish
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async ({ email, password }, { rejectWithValue }) => {
     try {
+      await setPersistence(auth, browserLocalPersistence);
+      
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      return userCredential.user;
+      return extractUserData(userCredential.user);
     } catch (error) {
       return rejectWithValue(error.message);
     }
   }
 );
 
-// 🔹 Google bilan kirish funksiyasi
+// Google orqali kirish
 export const googleLogin = createAsyncThunk(
   "auth/googleLogin",
   async (_, { rejectWithValue }) => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      return result.user;
+      const user = result.user;
+
+      if (result._tokenResponse?.isNewUser) {
+        await setDoc(doc(db, "users", user.uid), {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          createdAt: new Date().toISOString(),
+          lastLogin: new Date().toISOString()
+        });
+      }
+
+      return extractUserData(user);
     } catch (error) {
       return rejectWithValue(error.message);
     }
   }
 );
 
-// 🔹 Chiqish funksiyasi
+// Chiqish
 export const logout = createAsyncThunk(
   "auth/logout",
-  async () => {
-    await signOut(auth);
-    return null;
+  async (_, { rejectWithValue }) => {
+    try {
+      await signOut(auth);
+      return null;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
 );
 
-// 🔹 Redux Toolkit Slice
 const authSlice = createSlice({
   name: "auth",
   initialState: {
@@ -63,11 +142,28 @@ const authSlice = createSlice({
     loading: false,
     error: null,
     isAuthenticated: false,
+    authChecked: false
   },
-  reducers: {},
+  reducers: {
+    setUser: (state, action) => {
+      state.user = action.payload;
+      state.isAuthenticated = !!action.payload;
+    },
+    clearError: (state) => {
+      state.error = null;
+    },
+    setAuthChecked: (state, action) => {
+      state.authChecked = action.payload;
+    }
+  },
   extraReducers: (builder) => {
     builder
-      // ✅ Ro‘yxatdan o‘tish
+      .addCase(checkAuthState.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(checkAuthState.fulfilled, (state) => {
+        state.loading = false;
+      })
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -81,8 +177,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
-      // ✅ Email va parol bilan kirish
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -96,8 +190,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
-      // ✅ Google bilan kirish
       .addCase(googleLogin.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -111,10 +203,13 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
-      // ✅ Chiqish
-     
-  },
+      .addCase(logout.fulfilled, (state) => {
+        state.user = null;
+        state.isAuthenticated = false;
+      });
+  }
 });
 
+// Eksport qilish
+export const { setUser, clearError, setAuthChecked } = authSlice.actions;
 export default authSlice.reducer;
