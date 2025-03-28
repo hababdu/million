@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import Fulcontent from "./pages/Fulcontent";
 import Register from "./pages/register"; // Register faylini qo'shdik
 import Login from "./pages/Login"; // Login faylini ham qo'shdik
+import Checkout from "./pages/Checkout"; // Checkout faylini ham qo'shdik
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
                 <Route path="/likes" element={<Likes />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/full" element={<Fulcontent />} />
+                <Route path="/checkout" element={<Checkout />} />
               </Routes>
             </Layout>
           }

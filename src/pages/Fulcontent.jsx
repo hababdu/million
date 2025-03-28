@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useLocation } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
 import { toast } from "react-hot-toast";
 import { ArrowUturnLeftIcon } from "@heroicons/react/24/solid";
-import { useNavigate } from "react-router-dom";
-// Reytingni hisoblash algoritmi
+
+// Helper function to calculate average rating
 const calculateAverageRating = (reviews) => {
   if (!reviews || reviews.length === 0) return 0;
   const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
-  return (totalRating / reviews.length).toFixed(2);
+  return (totalRating / reviews.length).toFixed(1);
 };
 
-// Chegirmali narxni hisoblash
+// Calculate discounted price
 const calculateDiscountPrice = (price, discountPercentage) =>
   (price - (price * discountPercentage) / 100).toFixed(2);
 
-// Aktsiya mavjudligini tekshirish
+// Check if product is on sale
 const isOnSale = (price, discountedPrice) => price > discountedPrice;
 
 function FullProduct() {
@@ -24,18 +24,20 @@ function FullProduct() {
   const { id } = useParams();
   const location = useLocation();
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
 
   const [product, setProduct] = useState(location.state?.product || null);
   const [loading, setLoading] = useState(!product);
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(0);
 
   useEffect(() => {
     if (!product) {
       setLoading(true);
       fetch(`https://dummyjson.com/products/${id}`)
         .then((res) => {
-          if (!res.ok) throw new Error("Serverdan ma'lumot olishda xatolik");
+          if (!res.ok) throw new Error("Failed to fetch product");
           return res.json();
         })
         .then((data) => {
@@ -49,169 +51,258 @@ function FullProduct() {
     }
   }, [id, product]);
 
-  // Check if the product is available before accessing its properties
-  if (loading)
-    return <p className="text-center text-gray-500">⏳ Yuklanmoqda...</p>;
-  if (error)
-    return <p className="text-center text-red-500">❌ Xatolik: {error}</p>;
-  if (!product)
-    return <p className="text-center text-gray-500">Mahsulot topilmadi</p>;
-
-  const averageRating = calculateAverageRating(product.reviews);
-  const discountedPrice = calculateDiscountPrice(
-    product.price,
-    product.discountPercentage
-  );
-  const saleMessage = isOnSale(product.price, discountedPrice)
-    ? "🚨 Limited time offer!"
-    : "✅ In stock";
-
   const handleAddToCart = () => {
     const cartItem = { ...product, quantity };
     dispatch(addToCart(cartItem));
-    toast.success(`${product.title} (${quantity} dona) savatchaga qo‘shildi!`);
+    toast.success(`${product.title} (${quantity} dona) savatchaga qo'shildi!`);
   };
 
-  // Quantity oshirish funksiyasi
+  const handleBuyNow = () => {
+    if (!user) {
+      toast.error("Iltimos, avval ro'yxatdan o'ting yoki tizimga kiring", {
+        duration: 4000,
+        position: "top-center",
+      });
+      navigate("/register", { 
+        state: { 
+          from: location.pathname,
+          product: product 
+        } 
+      });
+      return;
+    }
+    
+    const order = { 
+      ...product, 
+      quantity,
+      totalPrice: (calculateDiscountPrice(product.price, product.discountPercentage) * quantity).toFixed(2)
+    };
+    navigate("/checkout", { state: { order } });
+  };
+
   const increaseQuantity = () => {
     if (quantity < product.stock) {
       setQuantity(quantity + 1);
     }
   };
 
-  // Quantity kamaytirish funksiyasi
   const decreaseQuantity = () => {
     if (quantity > 1) {
       setQuantity(quantity - 1);
     }
   };
 
+  if (loading) return (
+    <div className="flex justify-center items-center h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+  );
+
+  if (error) return (
+    <div className="text-center py-10">
+      <p className="text-red-500 text-lg">❌ {error}</p>
+      <button 
+        onClick={() => window.location.reload()}
+        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        Qayta urinish
+      </button>
+    </div>
+  );
+
+  if (!product) return (
+    <div className="text-center py-10">
+      <p className="text-gray-500 text-lg">Mahsulot topilmadi</p>
+    </div>
+  );
+
+  const discountedPrice = calculateDiscountPrice(product.price, product.discountPercentage);
+  const averageRating = calculateAverageRating(product.reviews);
+  const saleMessage = isOnSale(product.price, discountedPrice)
+    ? "🏷️ Chegirma!"
+    : "✅ Sotuvda";
+
   return (
-    <div className="container mx-auto text-gray-900 p-4 mb-15 bg-gray-50 min-h-screen">
-      {/* Orqaga tugma */}
+    <div className="container mx-auto p-4 mb-15 bg-gray-50 min-h-screen">
       <button
         onClick={() => navigate(-1)}
-        className="absolute bg-white top-4 left-4 flex items-center gap-2 text-gray-700 hover:text-gray-900 transition"
+        className="flex items-center gap-2 text-gray-700 hover:text-gray-900 mb-6"
       >
-        <ArrowUturnLeftIcon className="h-6 w-6" />
-        <span className="text-sm font-semibold">Orqaga</span>
+        <ArrowUturnLeftIcon className="h-5 w-5" />
+        <span className="text-sm font-medium">Orqaga</span>
       </button>
-      <h1 className="text-3xl font-bold text-center text-gray-900">
-        {product.title}
-      </h1>
 
-      <div className="flex w-full flex-col lg:flex-row gap-6 mt-6">
-        <div className="flex w-full flex-col gap-4 lg:w-1/3">
-          <img
-            src={product.thumbnail}
-            alt={product.title}
-            className="h-64 md:h-80 rounded-lg shadow-lg border border-gray-300"
-          />
-          <div className="flex gap-2 justify-center overflow-x-auto">
-            {product.images.map((img, index) => (
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+          {product.title}
+        </h1>
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Product Images */}
+          <div className="lg:w-1/2">
+            <div className="mb-4">
               <img
-                key={index}
-                src={img}
-                alt={`Image ${index}`}
-                className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-lg shadow-md border border-gray-300 cursor-pointer hover:opacity-80"
+                src={product.images[selectedImage]}
+                alt={product.title}
+                className="w-full h-64 md:h-96 object-contain rounded-lg border border-gray-200"
               />
-            ))}
-          </div>
-          <div className="flex items-center justify-center gap-4">
-            <button
-              onClick={decreaseQuantity}
-              className="px-4 py-2 bg-gray-200 text-gray-800 text-xl rounded-md hover:bg-gray-300"
-            >
-              -
-            </button>
-            <span className="text-lg text-gray-800 font-semibold">
-              {quantity}
-            </span>
-            <button
-              onClick={increaseQuantity}
-              className="px-4 py-2 bg-gray-200 text-gray-800 text-xl rounded-md hover:bg-gray-300"
-            >
-              +
-            </button>
-            <span className="text-sm text-gray-600">
-              ({product.stock} dona mavjud)
-            </span>
-          </div>
-        </div>
-
-        <div className="w-full lg:w-1/2 space-y-4">
-          <p className="text-gray-700">{product.description}</p>
-          <div className="text-lg text-red-600 font-semibold line-through">
-            {product.price} so'm
-          </div>
-          <div className="text-lg text-green-600 font-semibold bg-green-100 px-2 py-1 rounded-md">
-            {discountedPrice} so'm (-{product.discountPercentage}%)
-          </div>
-          <div className="text-lg font-semibold text-yellow-500">
-            {saleMessage}
-          </div>
-
-          <div className="mt-6">
-            <div className="font-semibold">Category: {product.category}</div>
-            <div className="font-semibold">Brand: {product.brand}</div>
-            <div className="font-semibold">SKU: {product.sku}</div>
-            <div className="font-semibold">Weight: {product.weight} g</div>
-            <div className="font-semibold">
-              Dimensions: {product.dimensions.width} x{" "}
-              {product.dimensions.height} x {product.dimensions.depth} cm
             </div>
-            <div className="font-semibold">
-              Warranty: {product.warrantyInformation}
-            </div>
-            <div className="font-semibold">
-              Shipping: {product.shippingInformation}
-            </div>
-            <div className="font-semibold">
-              Availability: {product.availabilityStatus}
-            </div>
-            <div className="font-semibold">
-              Return Policy: {product.returnPolicy}
-            </div>
-            <div className="font-semibold">
-              Min Order Quantity: {product.minimumOrderQuantity}
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {product.images.map((img, idx) => (
+                <img
+                  key={idx}
+                  src={img}
+                  alt={`${product.title} ${idx + 1}`}
+                  className={`w-16 h-16 object-cover rounded border cursor-pointer ${selectedImage === idx ? 'border-blue-500' : 'border-gray-200'}`}
+                  onClick={() => setSelectedImage(idx)}
+                />
+              ))}
             </div>
           </div>
 
-          <div className="flex gap-4">
-            <button
-              className="px-6 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-              onClick={() => navigate("/register")}
-            >
-              Buy Now
-            </button>
-            <button
-              className="px-6 py-3 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition"
-              onClick={handleAddToCart}
-            >
-              Add to Cart
-            </button>
-          </div>
+          {/* Product Details */}
+          <div className="lg:w-1/2">
+            <div className="mb-6">
+              <p className="text-gray-700 mb-4">{product.description}</p>
+              
+              <div className="flex items-center gap-4 mb-4">
+                <span className="text-xl font-bold text-gray-900">
+                  {discountedPrice} so'm
+                </span>
+                {product.discountPercentage > 0 && (
+                  <span className="text-lg text-gray-500 line-through">
+                    {product.price} so'm
+                  </span>
+                )}
+                {product.discountPercentage > 0 && (
+                  <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm">
+                    {product.discountPercentage}% chegirma
+                  </span>
+                )}
+              </div>
 
-          <div className="mt-6">
-            <h3 className="text-xl font-semibold">
-              Reviews (Average Rating: {averageRating})
-            </h3>
-            {product.reviews && product.reviews.length > 0 ? (
-              product.reviews.map((review, index) => (
-                <div key={index} className="border-b py-2">
-                  <div className="font-semibold">{review.reviewerName}</div>
-                  <div className="text-sm text-gray-600">
-                    {new Date(review.date).toLocaleDateString()}
-                  </div>
-                  <div className="text-sm">{review.comment}</div>
-                  <div className="text-sm">Rating: {review.rating}</div>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <span
+                      key={i}
+                      className={`text-lg ${i < Math.floor(averageRating) ? 'text-yellow-400' : 'text-gray-300'}`}
+                    >
+                      ★
+                    </span>
+                  ))}
                 </div>
-              ))
-            ) : (
-              <p className="text-gray-500">No reviews available.</p>
-            )}
+                <span className="text-gray-600 text-sm">
+                  ({averageRating} / 5.0)
+                </span>
+              </div>
+
+              <div className="mb-4">
+                <span className={`px-2 py-1 rounded text-sm font-medium ${
+                  product.stock > 0 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-red-100 text-red-800'
+                }`}>
+                  {product.stock > 0 ? `${product.stock} dona mavjud` : 'Qolmagan'}
+                </span>
+                <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">
+                  {saleMessage}
+                </span>
+              </div>
+            </div>
+
+            {/* Quantity Selector */}
+            <div className="mb-6">
+              <div className="flex items-center gap-4">
+                <span className="text-gray-700 font-medium">Miqdor:</span>
+                <div className="flex items-center border border-gray-300 rounded">
+                  <button
+                    onClick={decreaseQuantity}
+                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-800"
+                    disabled={quantity <= 1}
+                  >
+                    -
+                  </button>
+                  <span className="px-4 py-1 text-center w-12">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={increaseQuantity}
+                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-800"
+                    disabled={quantity >= product.stock}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+              <button
+                onClick={handleBuyNow}
+                className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition"
+              >
+                Hoziroq sotib olish
+              </button>
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white font-medium rounded-md transition"
+              >
+                Savatchaga qo'shish
+              </button>
+            </div>
+
+            {/* Product Specifications */}
+            <div className="border-t pt-4">
+              <h3 className="text-lg font-semibold mb-3">Mahsulot xususiyatlari</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-gray-600"><span className="font-medium">Kategoriya:</span> {product.category}</p>
+                  <p className="text-gray-600"><span className="font-medium">Brend:</span> {product.brand}</p>
+                  <p className="text-gray-600"><span className="font-medium">Model:</span> {product.model || 'Mavjud emas'}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600"><span className="font-medium">Kafolat:</span> {product.warranty || '1 yil'}</p>
+                  <p className="text-gray-600"><span className="font-medium">Yetkazib berish:</span> 2-3 ish kuni</p>
+                  <p className="text-gray-600"><span className="font-medium">Qaytarish:</span> 14 kun ichida</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Reviews Section */}
+        {product.reviews && product.reviews.length > 0 && (
+          <div className="mt-8 border-t pt-6">
+            <h3 className="text-xl font-semibold mb-4">Fikrlar ({product.reviews.length})</h3>
+            <div className="space-y-4">
+              {product.reviews.map((review, index) => (
+                <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <p className="font-medium">{review.reviewerName}</p>
+                      <p className="text-gray-500 text-sm">
+                        {new Date(review.date).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex">
+                      {[...Array(5)].map((_, i) => (
+                        <span
+                          key={i}
+                          className={`text-sm ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-gray-700">{review.comment}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
