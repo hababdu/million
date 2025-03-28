@@ -2,16 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toggleLike } from "../redux/likeSlice";
 import axios from "axios";
-import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { FaHeart, FaRegHeart, FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { FiShoppingBag } from "react-icons/fi";
 
 const SkeletonLoader = () => (
-  <div className=" rounded-lg shadow-sm overflow-hidden relative animate-pulse bg-gray-200">
-    <div className="w-full h-48 bg-gray-300"></div>
+  <div className="rounded-lg shadow-sm overflow-hidden relative animate-pulse bg-gray-800">
+    <div className="w-full h-48 bg-gray-700"></div>
     <div className="p-3">
-      <div className="h-6 bg-gray-400 mb-2"></div>
-      <div className="h-4 bg-gray-400 mb-2"></div>
-      <div className="h-4 bg-gray-400 mb-2 w-1/2"></div>
+      <div className="h-6 bg-gray-600 mb-2"></div>
+      <div className="h-4 bg-gray-600 mb-2"></div>
+      <div className="h-4 bg-gray-600 mb-2 w-1/2"></div>
     </div>
   </div>
 );
@@ -60,102 +61,132 @@ function Likes() {
   };
 
   return (
-    <div className="p-4 text-gray-950">
-      <h2 className="text-xl font-bold mb-3">Sevimli Mahsulotlar</h2>
-
-      {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {/* Yuklanayotgan paytda skeletlar */}
-          {Array.from({ length: 8 }).map((_, index) => (
-            <SkeletonLoader key={index} />
-          ))}
+    <div className="p-6 bg-gray-900 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center mb-8">
+          <FiShoppingBag className="text-indigo-400 text-3xl mr-3" />
+          <h2 className="text-3xl font-bold text-gray-100">Sevimli Mahsulotlar</h2>
         </div>
-      ) : likedItems.length === 0 ? (
-        <p>Sevimli mahsulotlaringiz yo‘q</p>
-      ) : (
-        <div className="grid grid-cols-2  md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {likedItems.map((product) => {
-            const isLiked = likedProducts.includes(product.id);
-            const discountedPrice = (
-              product.price * (1 - product.discountPercentage / 100)
-            ).toFixed(2);
 
-            return (
-              <div
-  key={product.id}
-  className="relative bg-[#3A3A3A] max-w-xs rounded-lg shadow-lg cursor-pointer p-2"
->
-  {/* Like tugmasi */}
-  <button
-    onClick={() => confirmUnlike(product)}
-    className="absolute top-2 right-2 text-yellow-400 text-lg z-10"
-  >
-    {isLiked ? <FaHeart /> : <FaRegHeart />}
-  </button>
+        {loading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <SkeletonLoader key={index} />
+            ))}
+          </div>
+        ) : likedItems.length === 0 ? (
+          <div className="bg-gray-800 rounded-xl shadow-sm p-8 text-center">
+            <FaHeart className="mx-auto text-gray-500 text-5xl mb-4" />
+            <h3 className="text-xl font-medium text-gray-300 mb-2">Sevimli mahsulotlar yo'q</h3>
+            <p className="text-gray-400">Siz hali hech qanday mahsulotni sevimlilarga qo'shmagansiz</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {likedItems.map((product) => {
+              const isLiked = likedProducts.includes(product.id);
+              const discountedPrice = (
+                product.price * (1 - product.discountPercentage / 100)
+              ).toFixed(2);
 
-  {/* Mahsulot rasmi */}
-  <img
-    onClick={() => handleNavi(product)}
-    src={product.thumbnail}
-    alt={product.title}
-    className="rounded-md w-full h-36 md:h-40 object-cover"
-  />
+              return (
+                <div
+                  key={product.id}
+                  className="relative bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-700"
+                >
+                  {/* Like button */}
+                  <button
+                    onClick={() => confirmUnlike(product)}
+                    className={`absolute top-3 right-3 z-10 p-2 rounded-full ${isLiked ? 'bg-red-900/30 text-red-400' : 'bg-gray-700 text-gray-400'} hover:bg-red-900/50 transition-colors`}
+                  >
+                    {isLiked ? <FaHeart /> : <FaRegHeart />}
+                  </button>
 
-  {/* Mahsulot ma'lumotlari */}
-  <div onClick={() => handleNavi(product)} className="p-2">
-    <h2 className="text-xs md:text-sm lg:text-base text-white font-semibold line-clamp-2">
-      {product.title}
-    </h2>
-    <p className="text-gray-500 text-xs md:text-sm">{product.category}</p>
-    <p className="text-white text-xs md:text-sm">{product.brand}</p>
+                  {/* Product image */}
+                  <div 
+                    onClick={() => handleNavi(product)}
+                    className="cursor-pointer"
+                  >
+                    <img
+                      src={product.thumbnail}
+                      alt={product.title}
+                      className="w-full h-48 object-cover"
+                    />
+                  </div>
 
-    {/* Narx va chegirma */}
-    <div className="flex items-center justify-between mt-1">
-      <p className="text-gray-400 line-through text-xs md:text-sm">${product.price}</p>
-      <p className="text-green-700 font-semibold text-sm md:text-base">
-        ${discountedPrice}
-      </p>
-    </div>
+                  {/* Product details */}
+                  <div 
+                    onClick={() => handleNavi(product)}
+                    className="p-4 cursor-pointer"
+                  >
+                    <h2 className="text-sm font-semibold text-gray-100 line-clamp-1 mb-1">
+                      {product.title}
+                    </h2>
+                    <p className="text-xs text-gray-400 mb-2">{product.brand}</p>
+                    
+                    {/* Price and discount */}
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-indigo-400 font-bold text-sm">
+                        ${discountedPrice}
+                      </span>
+                      <span className="text-xs text-gray-500 line-through">
+                        ${product.price}
+                      </span>
+                    </div>
 
-    {/* Reyting yulduzlari */}
-    <div className="flex mt-1">
-      {[...Array(Math.round(product.rating))].map((_, i) => (
-        <span key={i} className="text-yellow-500 text-xs md:text-sm">★</span>
-      ))}
-    </div>
-  </div>
-</div>
+                    {/* Rating */}
+                    <div className="flex items-center">
+                      <div className="flex text-yellow-400 text-xs">
+                        {[...Array(5)].map((_, i) => (
+                          <span key={i}>
+                            {i < Math.round(product.rating) ? '★' : '☆'}
+                          </span>
+                        ))}
+                      </div>
+                      <span className="text-xs text-gray-400 ml-1">
+                        ({product.rating})
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
-            );
-          })}
-        </div>
-      )}
-
-      {/* Modal oyna */}
-      {showModal && selectedProduct && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <h3 className="text-lg font-semibold">Mahsulotni o‘chirish</h3>
-            <p className="text-white mt-2">
-              "{selectedProduct.title}" ni sevimlilardan o‘chirmoqchimisiz?
-            </p>
-            <div className="mt-4 flex justify-center space-x-4">
-              <button
-                onClick={handleUnlike}
-                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-              >
-                Ha, o‘chirish
-              </button>
-              <button
-                onClick={() => setShowModal(false)}
-                className="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400"
-              >
-                Bekor qilish
-              </button>
+        {/* Confirmation Modal */}
+        {showModal && selectedProduct && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
+            <div className="bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md border border-gray-700">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-100">O'chirishni tasdiqlash</h3>
+                <button 
+                  onClick={() => setShowModal(false)}
+                  className="text-gray-400 hover:text-gray-200"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+              <p className="text-gray-300 mb-6">
+                "{selectedProduct.title}" ni sevimlilardan o'chirmoqchimisiz?
+              </p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 border border-gray-600 rounded-lg text-gray-200 hover:bg-gray-700 transition-colors"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  onClick={handleUnlike}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  O'chirish
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

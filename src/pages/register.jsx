@@ -86,24 +86,25 @@ const Register = () => {
     dispatch(googleLogin());
   };
 
-
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg">
         <div className="text-center">
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Create a new account</h2>
+          <h2 className="mt-6 text-3xl font-bold text-gray-900">Create your account</h2>
           <p className="mt-2 text-sm text-gray-600">
-            Or{' '}
-            <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-              sign in to your existing account
+            Already have an account?{' '}
+            <Link 
+              to="/login" 
+              className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
+            >
+              Sign in here
             </Link>
           </p>
         </div>
 
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-            <div className="flex">
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg mb-6">
+            <div className="flex items-center">
               <div className="flex-shrink-0">
                 <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
@@ -117,9 +118,9 @@ const Register = () => {
         )}
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm space-y-4">
+          <div className="rounded-md shadow-sm space-y-5">
             <div>
-              <label htmlFor="username" className="sr-only">Username</label>
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">Username</label>
               <input
                 id="username"
                 name="username"
@@ -128,8 +129,8 @@ const Register = () => {
                 required
                 value={formData.username}
                 onChange={handleChange}
-                className={`appearance-none relative block w-full px-3 py-2 border ${errors.username ? 'border-red-300' : 'border-gray-300'} placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                placeholder="Username"
+                className={`appearance-none relative block w-full px-4 py-3 border ${errors.username ? 'border-red-300 bg-red-50' : 'border-gray-300'} placeholder-gray-400 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+                placeholder="Enter your username"
               />
               {errors.username && (
                 <p className="mt-1 text-sm text-red-600">{errors.username}</p>
@@ -137,7 +138,7 @@ const Register = () => {
             </div>
             
             <div>
-              <label htmlFor="email" className="sr-only">Email address</label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
               <input
                 id="email"
                 name="email"
@@ -146,8 +147,8 @@ const Register = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className={`appearance-none relative block w-full px-3 py-2 border ${errors.email ? 'border-red-300' : 'border-gray-300'} placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                placeholder="Email address"
+                className={`appearance-none relative block w-full px-4 py-3 border ${errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'} placeholder-gray-400 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+                placeholder="Enter your email"
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email}</p>
@@ -155,7 +156,7 @@ const Register = () => {
             </div>
             
             <div>
-              <label htmlFor="password" className="sr-only">Password</label>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
               <input
                 id="password"
                 name="password"
@@ -164,8 +165,8 @@ const Register = () => {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className={`appearance-none relative block w-full px-3 py-2 border ${errors.password ? 'border-red-300' : 'border-gray-300'} placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                placeholder="Password (min 6 characters)"
+                className={`appearance-none relative block w-full px-4 py-3 border ${errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300'} placeholder-gray-400 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+                placeholder="At least 6 characters"
               />
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">{errors.password}</p>
@@ -173,7 +174,7 @@ const Register = () => {
             </div>
             
             <div>
-              <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
               <input
                 id="confirmPassword"
                 name="confirmPassword"
@@ -182,8 +183,8 @@ const Register = () => {
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className={`appearance-none relative block w-full px-3 py-2 border ${errors.confirmPassword ? 'border-red-300' : 'border-gray-300'} placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
-                placeholder="Confirm Password"
+                className={`appearance-none relative block w-full px-4 py-3 border ${errors.confirmPassword ? 'border-red-300 bg-red-50' : 'border-gray-300'} placeholder-gray-400 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm`}
+                placeholder="Re-enter your password"
               />
               {errors.confirmPassword && (
                 <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
@@ -195,20 +196,28 @@ const Register = () => {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {loading ? 'Creating account...' : 'Create Account'}
+              {loading ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Creating account...
+                </span>
+              ) : 'Create Account'}
             </button>
           </div>
         </form>
 
-        <div className="mt-6">
+        <div className="mt-8">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or sign up with</span>
+              <span className="px-2 bg-white text-gray-500">Or continue with</span>
             </div>
           </div>
 
@@ -216,9 +225,9 @@ const Register = () => {
             <button
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="w-full flex items-center justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              <FaGoogle className="mr-2 text-red-500" />
+              <FaGoogle className="mr-3 text-red-500" />
               Sign up with Google
             </button>
           </div>

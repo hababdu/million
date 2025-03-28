@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchQuery } from "../redux/productSlice";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   HomeIcon,
   ShoppingBagIcon,
@@ -15,7 +15,9 @@ import {
 import logo from "../assets/logo.svg";
 
 function Layout({ children }) {
+  const likedProducts = useSelector((state) => state.likes.likedProducts);
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const searchQuery = useSelector((state) => state.products.searchQuery);
   const products = useSelector((state) => state.products.products);
@@ -23,11 +25,11 @@ function Layout({ children }) {
   const cartItems = useSelector((state) => state.cart.cartItems);
   const [categories, setCategories] = useState([]);
 
-  const filteredProducts = products.filter((product) => 
+  const filteredProducts = products.filter((product) =>
     (product.title?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
     (product.category?.toLowerCase() || "").includes(searchQuery.toLowerCase())
   );
-     
+
   const handleNavi = (product) => {
     navigate("/full", { state: { product } });
     setSearchVisible(false);
@@ -49,200 +51,296 @@ function Layout({ children }) {
     }
   };
 
-  const groupedProducts = filteredProducts.reduce((acc, product) => {
-    if (!acc[product.category]) {
-      acc[product.category] = [];
-    }
-    acc[product.category].push(product);
-    return acc;
-  }, {});
-
   useEffect(() => {
-    const groupedProducts = {};
-    products.forEach(product => {
-      if (!groupedProducts[product.category]) {
-        groupedProducts[product.category] = [];
-      }
-      groupedProducts[product.category].push(product);
-    });
-    setCategories(Object.keys(groupedProducts));
+    const uniqueCategories = [...new Set(products.map(product => product.category))];
+    setCategories(uniqueCategories);
   }, [products]);
 
   return (
-    <div className="flex flex-col z-50 min-h-screen bg-[#2B2B2B] text-white">
-      <header className="bg-gradient-to-l bg-[#2B2B2B] fixed top-0 left-0 w-full text-white p-1 flex flex-col items-center shadow-lg z-50">
-        <div className="flex w-full max-w-7xl justify-between items-center">
-          <Link to="/">
-            <img src={logo} alt="Logo" className="h-10 md:h-12" />
-          </Link>
+    <div className="flex flex-col min-h-screen bg-gray-900 text-white">
+      {/* Header */}
+      <header className="bg-gray-800 fixed top-0 left-0 w-full z-50 shadow-lg">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex flex-col">
+            {/* Top Row - Logo, Navigation, Icons */}
+            <div className="flex justify-between items-center">
+              {/* Logo */}
+              <Link to="/" className="flex items-center">
+                <img src={logo} alt="Logo" className="h-10 md:h-12" />
+              </Link>
 
-          <nav className="hidden md:flex gap-6">
-            <Link to="/" className="hover:text-gray-400 transition">Home</Link>
-            <Link to="/browse" className="hover:text-gray-400 transition">Browse</Link>
-            <Link to="/cart" className="relative">
-              Store
-              {cartItems.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                  {cartItems.length}
-                </span>
-              )}
-            </Link>
-            <Link to="/order" className="hover:text-gray-400 transition">Orders</Link>
-            <Link to="/profile" className="hover:text-gray-400 transition">Profile</Link>
-          </nav>
+              {/* Desktop Navigation */}
+              <nav className="hidden md:flex items-center space-x-4 lg:space-x-6">
+                <Link
+                  to="/"
+                  className={`px-3 py-2 rounded-lg transition ${location.pathname === "/" ? "bg-purple-600 text-white" : "text-gray-300 hover:bg-gray-700"}`}
+                >
+                  Home
+                </Link>
+                <Link
+                  to="/browse"
+                  className={`px-3 py-2 rounded-lg transition ${location.pathname === "/browse" ? "bg-purple-600 text-white" : "text-gray-300 hover:bg-gray-700"}`}
+                >
+                  Browse
+                </Link>
+                <Link
+                  to="/cart"
+                  className={`px-3 py-2 rounded-lg transition relative ${location.pathname === "/cart" ? "bg-purple-600 text-white" : "text-gray-300 hover:bg-gray-700"}`}
+                >
+                  Store
+                  {cartItems.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                      {cartItems.length}
+                    </span>
+                  )}
+                </Link>
+                <Link
+                  to="/order"
+                  className={`px-3 py-2 rounded-lg transition ${location.pathname === "/order" ? "bg-purple-600 text-white" : "text-gray-300 hover:bg-gray-700"}`}
+                >
+                  Orders
+                </Link>
+                <Link
+                  to="/profile"
+                  className={`px-3 py-2 rounded-lg transition ${location.pathname === "/profile" ? "bg-purple-600 text-white" : "text-gray-300 hover:bg-gray-700"}`}
+                >
+                  Profile
+                </Link>
+              </nav>
 
-          <div className="hidden md:flex gap-6 items-center">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="bg-gray-300 text-gray-900 px-3 py-2 rounded-full shadow-md border focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
-                value={searchQuery}
-                onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-              />
-              {searchQuery && filteredProducts.length > 0 && (
-                <div className="w-full absolute bg-gray-700 z-50 rounded-md p-2 mt-2">
-                  <h3 className="text-gray-300 font-semibold">Results:</h3>
-                  <ul className="max-h-60 overflow-y-auto">
-                    {Object.entries(groupedProducts).map(([category, products]) => (
-                      <li key={category} className="p-2 border-b border-gray-600">
-                        <h4 className="text-yellow-300 font-semibold mb-2">{category}</h4>
-                        {products.map((product) => (
-                          <div
-                            key={product.id}
-                            onClick={() => handleNavi(product)}
-                            className="flex items-center gap-3 p-2 hover:bg-gray-500 transition cursor-pointer"
-                          >
-                            <img
-                              src={product.thumbnail}
-                              alt={product.title}
-                              className="w-12 h-12 object-cover rounded-md"
-                            />
-                            <span className="text-white">{product.title}</span>
-                          </div>
-                        ))}
-                      </li>
-                    ))}
-                  </ul>
+              {/* Desktop Search and Icons */}
+              <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
+                <div className="relative">
+                  <div className="flex items-center">
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      className="bg-gray-700 text-white px-4 py-2 rounded-full w-40 lg:w-64 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      value={searchQuery}
+                      onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+                    />
+                    {searchQuery && (
+                      <XMarkIcon
+                        className="h-5 w-5 ml-2 text-gray-400 cursor-pointer hover:text-white"
+                        onClick={clearSearch}
+                      />
+                    )}
+                  </div>
+
+                  {searchQuery && filteredProducts.length > 0 && (
+                    <div className="absolute top-full left-0 w-full bg-gray-700 rounded-lg shadow-xl mt-1 max-h-96 overflow-y-auto">
+                      <div className="p-3">
+                        {categories.map((category) => {
+                          const categoryProducts = filteredProducts.filter(
+                            (product) => product.category === category
+                          );
+                          if (categoryProducts.length === 0) return null;
+                          
+                          return (
+                            <div key={category} className="mb-4 last:mb-0">
+                              <h4 className="text-purple-400 font-semibold mb-2 px-2">{category}</h4>
+                              <div className="space-y-2">
+                                {categoryProducts.map((product) => (
+                                  <div
+                                    key={product.id}
+                                    onClick={() => handleNavi(product)}
+                                    className="flex items-center p-2 hover:bg-gray-600 rounded-lg cursor-pointer transition"
+                                  >
+                                    <img
+                                      src={product.thumbnail}
+                                      alt={product.title}
+                                      className="w-10 h-10 object-cover rounded-md"
+                                    />
+                                    <div className="ml-3">
+                                      <p className="text-white font-medium">{product.title}</p>
+                                      <p className="text-sm text-gray-300">
+                                        ${(product.price * (1 - product.discountPercentage / 100)).toFixed(2)}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <Link to="/likes">
-              <HeartIcon className="h-6 w-6 text-red-500 hover:text-red-700 transition" />
-            </Link>
-            <Link to="/cart" className="relative">
-              <ShoppingCartIcon className="h-6 w-6 text-white hover:text-gray-400 transition" />
-              {cartItems.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                  {cartItems.length}
-                </span>
-              )}
-            </Link>
-          </div>
 
-          <div className="flex gap-4 md:hidden items-center">
-            <Link to="/likes">
-              <HeartIcon className="h-6 w-6 text-red-500 hover:text-red-700 transition" />
-            </Link>
-            <Link to="/cart" className="relative">
-              <ShoppingCartIcon className="h-6 w-6 text-white hover:text-gray-400 transition" />
-              {cartItems.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                  {cartItems.length}
-                </span>
-              )}
-            </Link>
-            <MagnifyingGlassIcon
-              className="h-6 w-6 text-white cursor-pointer hover:text-gray-400 transition"
-              onClick={() => setSearchVisible(true)}
-            />
+                <Link
+                  to="/likes"
+                  className={`p-2 rounded-full ${location.pathname === "/likes" ? "bg-purple-600" : "hover:bg-gray-700"} bg-gray-600 transition relative`}
+                >
+                  <HeartIcon className="h-6 w-6 text-red-500" />
+                  {likedProducts.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                      {likedProducts.length}
+                    </span>
+                  )}
+                </Link>
+
+                <Link
+                  to="/cart"
+                  className={`p-2 rounded-full relative bg-gray-600 ${location.pathname === "/cart" ? "bg-purple-600" : "hover:bg-gray-700"} transition`}
+                >
+                  <ShoppingCartIcon className="h-6 w-6 text-white" />
+                  {cartItems.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                      {cartItems.length}
+                    </span>
+                  )}
+                </Link>
+              </div>
+
+              {/* Mobile Icons */}
+              <div className="flex items-center space-x-4 md:hidden">
+                <button
+                  onClick={() => setSearchVisible(!searchVisible)}
+                  className="p-2"
+                >
+                  <MagnifyingGlassIcon className="h-6 w-6 text-white" />
+                </button>
+                <Link to="/likes" className="p-2 relative">
+                  <HeartIcon className="h-6 w-6 text-red-500" />
+                  {likedProducts.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
+                      {likedProducts.length}
+                    </span>
+                  )}
+                </Link>
+                <Link to="/cart" className="p-2 relative">
+                  <ShoppingCartIcon className="h-6 w-6 text-white" />
+                  {cartItems.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
+                      {cartItems.length}
+                    </span>
+                  )}
+                </Link>
+              </div>
+            </div>
+
+            {/* Mobile Search */}
+            {searchVisible && (
+              <div className="mt-3 md:hidden">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    className="w-full bg-gray-700 text-white px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    value={searchQuery}
+                    onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+                  />
+                  <XMarkIcon
+                    className="h-5 w-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer hover:text-white"
+                    onClick={() => setSearchVisible(false)}
+                  />
+                </div>
+
+                {searchQuery && filteredProducts.length > 0 && (
+                  <div className="mt-2 bg-gray-700 rounded-lg p-3 max-h-64 overflow-y-auto">
+                    {categories.map((category) => {
+                      const categoryProducts = filteredProducts.filter(
+                        (product) => product.category === category
+                      );
+                      if (categoryProducts.length === 0) return null;
+                      
+                      return (
+                        <div key={category} className="mb-4 last:mb-0">
+                          <h4 className="text-purple-400 font-semibold mb-2 px-2">{category}</h4>
+                          <div className="space-y-2">
+                            {categoryProducts.map((product) => (
+                              <div
+                                key={product.id}
+                                onClick={() => handleNavi(product)}
+                                className="flex items-center p-2 hover:bg-gray-600 rounded-lg cursor-pointer transition"
+                              >
+                                <img
+                                  src={product.thumbnail}
+                                  alt={product.title}
+                                  className="w-10 h-10 object-cover rounded-md"
+                                />
+                                <div className="ml-3">
+                                  <p className="text-white font-medium">{product.title}</p>
+                                  <p className="text-sm text-gray-300">
+                                    ${(product.price * (1 - product.discountPercentage / 100)).toFixed(2)}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Categories */}
+            <div className="mt-3 overflow-x-auto whitespace-nowrap scrollbar-hide">
+              <div className="inline-flex space-x-2">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => handleCategoryClick(category)}
+                    className="px-4 py-1.5 bg-gray-700 text-white text-sm rounded-full hover:bg-purple-600 transition"
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
-
-        {searchVisible && (
-          <div className="absolute z-50 top-full left-0 w-full bg-gray-800  flex flex-col items-start gap-2 shadow-md md:hidden">
-            <div className="relative p-2 w-full">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full text-gray-900 bg-white p-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={searchQuery}
-                onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-              />
-              <XMarkIcon
-                className="h-6 w-6 absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-700 cursor-pointer hover:text-gray-900 transition duration-200"
-                onClick={() => setSearchVisible(false)}
-              />
-            </div>
-
-            {searchQuery && filteredProducts.length > 0 && (
-                <div className="w-full top-full absolute bg-gray-700 z-50 rounded-md p-2 ">
-                  <h3 className="text-gray-300 font-semibold">Results:</h3>
-                  <ul className="max-h-120  overflow-y-auto">
-                    {Object.entries(groupedProducts).map(([category, products]) => (
-                      <li key={category} className="p-2 border-b border-gray-600">
-                        <h4 className="text-yellow-300 font-semibold mb-2">{category}</h4>
-                        {products.map((product) => (
-                          <div
-                            key={product.id}
-                            onClick={() => handleNavi(product)}
-                            className="flex items-center gap-3 p-2 hover:bg-gray-500 transition cursor-pointer"
-                          >
-                            <img
-                              src={product.thumbnail}
-                              alt={product.title}
-                              className="w-12 h-12 object-cover rounded-md"
-                            />
-                            <span className="text-white">{product.title}</span>
-                          </div>
-                        ))}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-          </div>
-        )}
-
-        <ul className="w-full overflow-x-auto whitespace-nowrap  flex gap-2 text-white px-4 py-1">
-          {categories.map((category) => (
-            <li
-              key={category}
-              className="bg-[#A259FF] text-gray-300 px-3 py-1 text-sm rounded-full hover:bg-gray-600 transition cursor-pointer"
-              onClick={() => handleCategoryClick(category)}
-            >
-              {category}
-            </li>
-          ))}
-        </ul>
       </header>
 
-      <main className="flex-grow mt-20 ">{children}</main>
+      {/* Main Content */}
+      <main className="flex-grow pt-32 pb-16 md:pb-0 px-4 container mx-auto">
+        {children}
+      </main>
 
-      <nav className="fixed bottom-0 w-full z-50 bg-[#2B2B2B] text-white flex justify-around items-center p-2 shadow-lg border-t border-gray-700 md:hidden">
-        <Link to="/" className="flex flex-col items-center hover:text-gray-400 transition">
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 flex justify-around py-3 z-40 md:hidden">
+        <Link
+          to="/"
+          className={`flex flex-col items-center p-2 rounded-lg ${location.pathname === "/" ? "text-purple-400" : "text-gray-300"}`}
+        >
           <HomeIcon className="h-6 w-6" />
-          <span className="text-xs">Home</span>
+          <span className="text-xs mt-1">Home</span>
         </Link>
-        <Link to="/browse" className="flex flex-col items-center hover:text-gray-400 transition">
+        <Link
+          to="/browse"
+          className={`flex flex-col items-center p-2 rounded-lg ${location.pathname === "/browse" ? "text-purple-400" : "text-gray-300"}`}
+        >
           <ShoppingBagIcon className="h-6 w-6" />
-          <span className="text-xs">Browse</span>
+          <span className="text-xs mt-1">Browse</span>
         </Link>
-        <Link to="/cart" className="relative">
-          <ShoppingCartIcon className="h-6 w-6 text-white hover:text-gray-400 transition" />
+        <Link
+          to="/cart"
+          className={`flex flex-col items-center p-2 rounded-lg relative ${location.pathname === "/cart" ? "text-purple-400" : "text-gray-300"}`}
+        >
+          <ShoppingCartIcon className="h-6 w-6" />
           {cartItems.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+            <span className="absolute -top-1 right-2 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
               {cartItems.length}
             </span>
           )}
+          <span className="text-xs mt-1">Cart</span>
         </Link>
-        <Link to="/order" className="flex flex-col items-center hover:text-gray-400 transition">
+        <Link
+          to="/order"
+          className={`flex flex-col items-center p-2 rounded-lg ${location.pathname === "/order" ? "text-purple-400" : "text-gray-300"}`}
+        >
           <ClockIcon className="h-6 w-6" />
-          <span className="text-xs">Orders</span>
+          <span className="text-xs mt-1">Orders</span>
         </Link>
-        <Link to="/profile" className="flex flex-col items-center hover:text-gray-400 transition">
+        <Link
+          to="/profile"
+          className={`flex flex-col items-center p-2 rounded-lg ${location.pathname === "/profile" ? "text-purple-400" : "text-gray-300"}`}
+        >
           <UserIcon className="h-6 w-6" />
-          <span className="text-xs">Profile</span>
+          <span className="text-xs mt-1">Profile</span>
         </Link>
       </nav>
     </div>

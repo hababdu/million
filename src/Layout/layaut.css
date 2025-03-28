@@ -1,0 +1,21 @@
+.cursor-grab {
+    cursor: grab;
+  }
+  
+  .cursor-grabbing {
+    cursor: grabbing;
+  }
+  
+  /* For the scrollable cart preview */
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: #374151; /* gray-700 */
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background: #7C3AED; /* purple-600 */
+    border-radius: 2px;
+  }
