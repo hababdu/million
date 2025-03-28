@@ -1,21 +1,48 @@
+/* Custom cursor styles for dragging */
 .cursor-grab {
     cursor: grab;
+    cursor: -webkit-grab;
   }
   
   .cursor-grabbing {
     cursor: grabbing;
+    cursor: -webkit-grabbing;
   }
   
-  /* For the scrollable cart preview */
+  /* Prevent text selection during drag */
+  .no-select {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  
+  /* Custom scrollbar styles */
   .scrollbar-custom::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
+    height: 6px;
   }
   
   .scrollbar-custom::-webkit-scrollbar-track {
     background: #374151; /* gray-700 */
+    border-radius: 3px;
   }
   
   .scrollbar-custom::-webkit-scrollbar-thumb {
     background: #7C3AED; /* purple-600 */
-    border-radius: 2px;
+    border-radius: 3px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background: #6D28D9; /* purple-700 */
+  }
+  
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
