@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchQuery } from "../redux/productSlice";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import '../index.css'
 import {
   HomeIcon,
   ShoppingBagIcon,
@@ -48,8 +49,22 @@ function Layout({ children }) {
   // Check if mobile view
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      // Mobile holatda boshlang'ich pozitsiyani o'rnatish
+      if (mobile) {
+        setPosition({
+          x: window.innerWidth - 80,
+          y: window.innerHeight - 180
+        });
+      } else {
+        setPosition({
+          x: window.innerWidth - 100,
+          y: 100
+        });
+      }
     };
+    
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -150,7 +165,6 @@ function Layout({ children }) {
 
   const handleTouchEnd = useCallback((e) => {
     if (e.touches.length === 0) {
-      // No touches means this is the final touch end
       handleDragEnd(clickStartPosition.x, clickStartPosition.y);
     }
   }, [handleDragEnd, clickStartPosition.x, clickStartPosition.y]);
@@ -180,7 +194,7 @@ function Layout({ children }) {
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white relative">
       {/* Header */}
-      <header className="bg-gray-800 fixed top-0 left-0 w-full z-50 shadow-lg">
+      <header className="bg-gray-800 fixed top-0 left-0 w-full z-40 shadow-lg">
         <div className="container mx-auto px-4 py-3">
           <div className="flex flex-col">
             {/* Top Row - Logo, Navigation, Icons */}
@@ -324,14 +338,6 @@ function Layout({ children }) {
                     </span>
                   )}
                 </Link>
-                <Link to="/cart" className="p-2 relative" onClick={() => setSearchVisible(false)}>
-                  <ShoppingCartIcon className="h-6 w-6 text-white" />
-                  {cartItems.length > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
-                      {cartItems.length}
-                    </span>
-                  )}
-                </Link>
               </div>
             </div>
 
@@ -415,41 +421,40 @@ function Layout({ children }) {
         {children}
       </main>
 
-      {/* Floating Cart Button (Desktop only) */}
-      {!isMobile && (
-        <div 
-          className={`fixed z-40 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} no-select`}
-          style={{
-            left: `${position.x}px`,
-            top: `${position.y}px`,
-            transition: isDragging ? 'none' : 'left 0.2s, top 0.2s',
-            touchAction: 'none',
-            zIndex: 40
-          }}
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}
-        >
-          <div className="relative">
-            <div 
-              className={`p-4 rounded-full shadow-lg transition-all flex items-center justify-center ${
-                cartItems.length > 0 
-                  ? 'bg-purple-600 hover:bg-purple-700' 
-                  : 'bg-gray-700 hover:bg-gray-600'
-              }`}
-            >
-              <ShoppingCartIcon className="h-6 w-6 text-white" />
-              {cartItems.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                  {cartItems.length}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Floating Cart Button (Both mobile and desktop) */}
+      <div 
+        className={`fixed z-50 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} no-select`}
+        style={{
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          transition: isDragging ? 'none' : 'left 0.2s, top 0.2s',
+          touchAction: 'none',
+          zIndex: 40
+        }}
+        onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
+      >
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 flex justify-around py-3 z-40 md:hidden">
+       <div className="relative">
+  <div 
+    className={`p-4 rounded-full z-50 flex items-center justify-center 
+      transition-all duration-500 shadow-lg hover:shadow-xl
+      ${cartItems.length > 0 
+        ? 'bg-gradient-to-br animate-gradient-x from-purple-500 via-pink-500 to-red-500 hover:from-purple-600 hover:via-pink-600 hover:to-red-600' 
+        : 'bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 hover:from-gray-700 hover:via-gray-800 hover:to-gray-900'
+      }`}
+  >
+    <ShoppingCartIcon className="h-6 w-6 text-white" />
+    {cartItems.length > 0 && (
+      <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full shadow-lg ring-2 ring-white">
+        {cartItems.length}
+      </span>
+    )}
+  </div>
+</div>
+</div>
+      {/* Mobile Bottom Navigation (without cart icon) */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 flex justify-around  z-30 md:hidden">
         <Link
           to="/"
           className={`flex flex-col items-center p-2 rounded-lg ${location.pathname === "/" ? "text-purple-400" : "text-gray-300"}`}
@@ -465,19 +470,6 @@ function Layout({ children }) {
         >
           <ShoppingBagIcon className="h-6 w-6" />
           <span className="text-xs mt-1">Browse</span>
-        </Link>
-        <Link
-          to="/cart"
-          className={`flex flex-col items-center p-2 rounded-lg relative ${location.pathname === "/cart" ? "text-purple-400" : "text-gray-300"}`}
-          onClick={() => setSearchVisible(false)}
-        >
-          <ShoppingCartIcon className="h-6 w-6" />
-          {cartItems.length > 0 && (
-            <span className="absolute -top-1 right-2 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
-              {cartItems.length}
-            </span>
-          )}
-          <span className="text-xs mt-1">Cart</span>
         </Link>
         <Link
           to="/order"

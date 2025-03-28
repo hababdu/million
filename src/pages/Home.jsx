@@ -210,7 +210,7 @@ function Home() {
                         transition={{ duration: 0.3 }}
                         className="group relative rounded-xl shadow-md overflow-hidden bg-gray-800 hover:bg-gray-700 transition-all duration-300"
                       >
-                        <div className="absolute top-3 right-3 z-10 flex flex-col space-y-2">
+                        <div className="absolute top-25 right-3 z-10 flex flex-col space-y-2">
                           <button
                             onClick={(e) => handleLikeToggle(e, product.id)}
                             className="p-1.5 bg-gray-900/50 rounded-full backdrop-blur-sm"

@@ -338,7 +338,7 @@ const FullProduct = () => {
             </div>
             
             {/* Thumbnail gallery */}
-            <div className="flex gap-3 overflow-x-auto py-2 scrollbar-hide">
+            <div className="flex gap-3  overflow-x-auto py-2 scrollbar-hide">
               {product.images?.map((img, idx) => (
                 <button
                   key={idx}
@@ -346,7 +346,7 @@ const FullProduct = () => {
                     setSelectedImage(idx);
                     setImageLoading(true);
                   }}
-                  className={`flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border-2 transition-all ${
+                  className={`flex-shrink-0 ml-2 w-16 h-16 rounded-md overflow-hidden border-2 transition-all ${
                     selectedImage === idx
                       ? 'border-purple-500 scale-110 ring-2 ring-purple-400'
                       : 'border-gray-600 hover:border-gray-400'
@@ -369,7 +369,7 @@ const FullProduct = () => {
             </h1>
             
             {/* Tab navigation */}
-            <div className="flex border-b border-gray-700 mb-6">
+            <div className="flex border-b border-gray-700 mb-6 overflow-scroll">
               <button
                 onClick={() => setActiveTab("description")}
                 className={`px-4 py-2 font-medium ${activeTab === "description" ? "text-purple-400 border-b-2 border-purple-400" : "text-gray-400"}`}
