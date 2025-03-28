@@ -123,7 +123,7 @@ function FullProduct() {
     : "✅ Sotuvda";
 
   return (
-    <div className="container mx-auto p-4 mb-15 bg-gray-50 min-h-screen">
+    <div className="container mx-auto p-4 mb-15 bg-black min-h-screen">
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-gray-700 hover:text-gray-900 mb-6"
@@ -132,7 +132,7 @@ function FullProduct() {
         <span className="text-sm font-medium">Orqaga</span>
       </button>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-gray-900 rounded-lg shadow-md p-6">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
           {product.title}
         </h1>
