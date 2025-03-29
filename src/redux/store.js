@@ -15,6 +15,7 @@ import cartReducer from "./cartSlice";
 import productReducer from './productSlice';
 import productHistoryReducer from './productSliceHistory';
 import authReducer from './authSlice';
+import themeReducer from "./themeSlice";
 
 // Auth uchun persist config
 const authPersistConfig = {
@@ -39,7 +40,8 @@ const store = configureStore({
     cart: persistedCartReducer,
     products: productReducer,
     productHistory: productHistoryReducer,
-    auth: persistedAuthReducer
+    auth: persistedAuthReducer,
+    theme: themeReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

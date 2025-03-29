@@ -26,6 +26,7 @@ const FullProduct = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { likedProducts } = useSelector((state) => state.likes);
+  const darkMode = useSelector((state) => state.theme.darkMode);
 
   const [product, setProduct] = useState(location.state?.product || null);
   const [loading, setLoading] = useState(!product);
@@ -268,322 +269,343 @@ const FullProduct = () => {
   const averageRating = calculateAverageRating(product.reviews);
 
   return (
-    <div className="container mx-auto p-4 pb-16 bg-gray-900 min-h-screen text-white">
-      {/* Back button */}
-      <button
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-gray-300 hover:text-white mb-6 transition-colors"
-      >
-        <ArrowUturnLeftIcon className="h-5 w-5" />
-        <span className="text-sm font-medium">Back</span>
-      </button>
-
-      {/* Main product section */}
-      <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-2xl overflow-hidden border border-gray-700">
-        <div className="flex flex-col lg:flex-row gap-8 p-6">
-          {/* Images section */}
-          <div className="lg:w-1/2">
-            <div className="relative mb-4 rounded-lg overflow-hidden bg-gray-700 aspect-square">
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={selectedImage}
-                  src={product.images?.[selectedImage] || ''}
-                  alt={product.title}
-                  initial={{ opacity: 0 }}
-                  animate={{ 
-                    opacity: imageLoading ? 0.5 : 1,
-                    scale: zoomImage ? 2 : 1
-                  }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  onLoad={() => setImageLoading(false)}
-                  onClick={() => setZoomImage(!zoomImage)}
-                  className={`w-full h-full object-contain p-4 cursor-${zoomImage ? 'zoom-out' : 'zoom-in'}`}
-                />
-              </AnimatePresence>
-              
-              {/* Like button */}
-              <button
-                onClick={handleLikeToggle}
-                className="absolute top-3 right-3 p-2 bg-gray-900 bg-opacity-60 rounded-full backdrop-blur-sm hover:bg-opacity-80 transition"
-              >
-                {isLiked ? (
-                  <HeartSolidFilled className="h-6 w-6 text-red-500" />
-                ) : (
-                  <HeartOutline className="h-6 w-6 text-white" />
-                )}
-              </button>
-              
-              {/* Discount badge */}
-              {isDiscounted && (
-                <span className="absolute top-3 left-3 bg-red-600 text-white px-2 py-1 rounded text-sm font-bold">
-                  -{product.discountPercentage}%
-                </span>
-              )}
-              
-              {/* Image navigation */}
-              <button 
-                onClick={prevImage}
-                className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-gray-900 bg-opacity-50 rounded-full hover:bg-opacity-70 transition"
-              >
-                <ChevronLeftIcon className="h-5 w-5" />
-              </button>
-              
-              <button 
-                onClick={nextImage}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-gray-900 bg-opacity-50 rounded-full hover:bg-opacity-70 transition"
-              >
-                <ChevronRightIcon className="h-5 w-5" />
-              </button>
-            </div>
+    <div className={`container mx-auto pb-16 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} min-h-screen ${darkMode ? 'text-white' : 'text-gray-900'} transition-colors duration-300`}>
+    {/* Back button */}
+    <button
+      onClick={() => navigate(-1)}
+      className={`flex items-center gap-2 ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'} mb-6 transition-colors`}
+    >
+      <ArrowUturnLeftIcon className="h-5 w-5" />
+      <span className="text-sm font-medium">Back</span>
+    </button>
+  
+    {/* Main product section */}
+    <div className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700' : 'bg-white border-gray-200'} rounded-xl shadow-2xl overflow-hidden border`}>
+      <div className="flex flex-col lg:flex-row gap-8 p-6">
+        {/* Images section */}
+        <div className="lg:w-1/2">
+          <div className={`relative mb-4 rounded-lg overflow-hidden ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} aspect-square`}>
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={selectedImage}
+                src={product.images?.[selectedImage] || ''}
+                alt={product.title}
+                initial={{ opacity: 0 }}
+                animate={{ 
+                  opacity: imageLoading ? 0.5 : 1,
+                  scale: zoomImage ? 2 : 1
+                }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                onLoad={() => setImageLoading(false)}
+                onClick={() => setZoomImage(!zoomImage)}
+                className={`w-full h-full object-contain p-4 cursor-${zoomImage ? 'zoom-out' : 'zoom-in'}`}
+              />
+            </AnimatePresence>
             
-            {/* Thumbnail gallery */}
-            <div className="flex gap-3  overflow-x-auto py-2 scrollbar-hide">
-              {product.images?.map((img, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setSelectedImage(idx);
-                    setImageLoading(true);
-                  }}
-                  className={`flex-shrink-0 ml-2 w-16 h-16 rounded-md overflow-hidden border-2 transition-all ${
-                    selectedImage === idx
-                      ? 'border-purple-500 scale-110 ring-2 ring-purple-400'
-                      : 'border-gray-600 hover:border-gray-400'
-                  }`}
-                >
-                  <img
-                    src={img}
-                    alt={`${product.title} ${idx + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
+            {/* Like button */}
+            <button
+              onClick={handleLikeToggle}
+              className={`absolute top-3 right-3 p-2 ${darkMode ? 'bg-gray-900 bg-opacity-60' : 'bg-white bg-opacity-60'} rounded-full backdrop-blur-sm hover:bg-opacity-80 transition`}
+            >
+              {isLiked ? (
+                <HeartSolidFilled className="h-6 w-6 text-red-500" />
+              ) : (
+                <HeartOutline className={`h-6 w-6 ${darkMode ? 'text-white' : 'text-gray-900'}`} />
+              )}
+            </button>
+            
+            {/* Discount badge */}
+            {isDiscounted && (
+              <span className="absolute top-3 left-3 bg-red-600 text-white px-2 py-1 rounded text-sm font-bold">
+                -{product.discountPercentage}%
+              </span>
+            )}
+            
+            {/* Image navigation */}
+            <button 
+              onClick={prevImage}
+              className={`absolute left-3 top-1/2 -translate-y-1/2 p-2 ${darkMode ? 'bg-gray-900 bg-opacity-50' : 'bg-white bg-opacity-50'} rounded-full hover:bg-opacity-70 transition`}
+            >
+              <ChevronLeftIcon className={`h-5 w-5 ${darkMode ? 'text-white' : 'text-gray-900'}`} />
+            </button>
+            
+            <button 
+              onClick={nextImage}
+              className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 ${darkMode ? 'bg-gray-900 bg-opacity-50' : 'bg-white bg-opacity-50'} rounded-full hover:bg-opacity-70 transition`}
+            >
+              <ChevronRightIcon className={`h-5 w-5 ${darkMode ? 'text-white' : 'text-gray-900'}`} />
+            </button>
           </div>
           
-          {/* Product details */}
-          <div className="lg:w-1/2">
-            <h1 className="text-2xl md:text-3xl font-bold mb-4">
-              {product.title}
-            </h1>
-            
-            {/* Tab navigation */}
-            <div className="flex border-b border-gray-700 mb-6 overflow-scroll">
+          {/* Thumbnail gallery */}
+          <div className="flex gap-3 overflow-x-auto py-2 scrollbar-hide">
+            {product.images?.map((img, idx) => (
               <button
-                onClick={() => setActiveTab("description")}
-                className={`px-4 py-2 font-medium ${activeTab === "description" ? "text-purple-400 border-b-2 border-purple-400" : "text-gray-400"}`}
+                key={idx}
+                onClick={() => {
+                  setSelectedImage(idx);
+                  setImageLoading(true);
+                }}
+                className={`flex-shrink-0 ml-2 w-16 h-16 rounded-md overflow-hidden border-2 transition-all ${
+                  selectedImage === idx
+                    ? 'border-purple-500 scale-110 ring-2 ring-purple-400'
+                    : darkMode 
+                      ? 'border-gray-600 hover:border-gray-400'
+                      : 'border-gray-300 hover:border-gray-500'
+                }`}
               >
-                Description
+                <img
+                  src={img}
+                  alt={`${product.title} ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                />
               </button>
-              <button
-                onClick={() => setActiveTab("specs")}
-                className={`px-4 py-2 font-medium ${activeTab === "specs" ? "text-purple-400 border-b-2 border-purple-400" : "text-gray-400"}`}
-              >
-                Specifications
-              </button>
-              <button
-                onClick={() => setActiveTab("reviews")}
-                className={`px-4 py-2 font-medium ${activeTab === "reviews" ? "text-purple-400 border-b-2 border-purple-400" : "text-gray-400"}`}
-              >
-                Reviews
-              </button>
-            </div>
-            
-            {/* Description tab */}
-            {activeTab === "description" && (
-              <div className="mb-6">
-                <p className="text-gray-300 mb-6">{product.description}</p>
-                
-                <div className="flex items-center gap-4 mb-4">
-                  <span className="text-2xl font-bold text-purple-400">
-                    ${discountedPrice}
-                  </span>
-                  {isDiscounted && (
-                    <span className="text-lg text-gray-400 line-through">
-                      ${product.price}
-                    </span>
-                  )}
-                  {isDiscounted && (
-                    <span className="bg-red-900 text-red-200 px-2 py-1 rounded text-sm">
-                      {product.discountPercentage}% off
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      i < Math.floor(averageRating) ? (
-                        <StarSolid key={i} className="h-5 w-5 text-yellow-400" />
-                      ) : (
-                        <StarIcon key={i} className="h-5 w-5 text-gray-500" />
-                      )
-                    ))}
-                  </div>
-                  <span className="text-gray-400 text-sm">
-                    ({averageRating} / 5.0) • {product.reviews?.length || 0} reviews
-                  </span>
-                </div>
-
-                <div className="flex flex-wrap gap-2 mb-6">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    product.stock > 0 
-                      ? 'bg-green-900 text-green-200' 
-                      : 'bg-red-900 text-red-200'
-                  }`}>
-                    {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
-                  </span>
-                  <span className="px-3 py-1 rounded-full bg-blue-900 text-blue-200 text-sm font-medium">
-                    {product.brand}
-                  </span>
-                  <span className="px-3 py-1 rounded-full bg-gray-700 text-gray-300 text-sm font-medium">
-                    {product.category}
-                  </span>
-                </div>
-              </div>
-            )}
-            
-            {/* Specifications tab */}
-            {activeTab === "specs" && (
-              <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-gray-300">General</h4>
-                  <p className="text-gray-400">
-                    <span className="font-medium">Brand:</span> {product.brand || 'N/A'}
-                  </p>
-                  <p className="text-gray-400">
-                    <span className="font-medium">Model:</span> {product.model || 'N/A'}
-                  </p>
-                  <p className="text-gray-400">
-                    <span className="font-medium">Category:</span> {product.category || 'N/A'}
-                  </p>
-                </div>
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-gray-300">Dimensions</h4>
-                  <p className="text-gray-400">
-                    <span className="font-medium">Size:</span> {formatDimensions(product.dimensions)}
-                  </p>
-                  {product.weight && (
-                    <p className="text-gray-400">
-                      <span className="font-medium">Weight:</span> {product.weight}
-                    </p>
-                  )}
-                  {product.material && (
-                    <p className="text-gray-400">
-                      <span className="font-medium">Material:</span> {product.material}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-gray-300">Warranty</h4>
-                  <p className="text-gray-400">
-                    <span className="font-medium">Period:</span> {product.warranty || '1 year'}
-                  </p>
-                  <p className="text-gray-400">
-                    <span className="font-medium">Returns:</span> Within 14 days
-                  </p>
-                </div>
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-gray-300">Shipping</h4>
-                  <p className="text-gray-400">
-                    <span className="font-medium">Time:</span> 2-3 business days
-                  </p>
-                  <p className="text-gray-400">
-                    <span className="font-medium">Cost:</span> $5.00
-                  </p>
-                </div>
-                {product.specifications && (
-                  <div className="col-span-full mt-4">
-                    <h4 className="font-semibold text-gray-300 mb-2">Additional Specifications</h4>
-                    {renderSpecifications(product.specifications)}
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {/* Reviews tab */}
-            {activeTab === "reviews" && (
-              <div className="mb-6">
-                {product.reviews && product.reviews.length > 0 ? (
-                  <div className="space-y-4">
-                    {product.reviews.map((review, index) => (
-                      <div key={index} className="bg-gray-700 p-4 rounded-lg">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <p className="font-medium text-white">{review.reviewerName || 'Anonymous'}</p>
-                            <p className="text-gray-400 text-sm">
-                              {review.date ? new Date(review.date).toLocaleDateString() : 'No date'}
-                            </p>
-                          </div>
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              i < (review.rating || 0) ? (
-                                <StarSolid key={i} className="h-5 w-5 text-yellow-400" />
-                              ) : (
-                                <StarIcon key={i} className="h-5 w-5 text-gray-500" />
-                              )
-                            ))}
-                          </div>
-                        </div>
-                        <p className="text-gray-300">{review.comment || 'No review text'}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-400 text-center py-4">No reviews available</p>
-                )}
-              </div>
-            )}
-            
-            {/* Quantity selector */}
-            <div className="mb-8">
-              <div className="flex items-center gap-4">
-                <span className="text-gray-300 font-medium">Quantity:</span>
-                <div className="flex items-center border border-gray-600 rounded-lg overflow-hidden">
-                  <button
-                    onClick={decreaseQuantity}
-                    className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 transition disabled:opacity-40"
-                    disabled={quantity <= 1}
-                  >
-                    -
-                  </button>
-                  <span className="px-4 py-2 text-center w-12 bg-gray-800 text-gray-200">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={increaseQuantity}
-                    className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 transition disabled:opacity-40"
-                    disabled={quantity >= (product.stock || 10)}
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Action buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-8">
-              <button
-                onClick={handleBuyNow}
-                className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-xl"
-              >
-                <BoltIcon className="h-5 w-5" />
-                Buy Now
-              </button>
+            ))}
+          </div>
+        </div>
+        
+        {/* Product details */}
+        <div className="lg:w-1/2">
+          <h1 className={`text-2xl md:text-3xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+            {product.title}
+          </h1>
+          
+          {/* Tab navigation */}
+          <div className={`flex border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} mb-6 overflow-scroll`}>
+            <button
+              onClick={() => setActiveTab("description")}
+              className={`px-4 py-2 font-medium ${activeTab === "description" 
+                ? `${darkMode ? 'text-purple-400 border-purple-400' : 'text-purple-600 border-purple-600'} border-b-2`
+                : darkMode 
+                  ? 'text-gray-400'
+                  : 'text-gray-500'
+              }`}
+            >
+              Description
+            </button>
+            <button
+              onClick={() => setActiveTab("specs")}
+              className={`px-4 py-2 font-medium ${activeTab === "specs" 
+                ? `${darkMode ? 'text-purple-400 border-purple-400' : 'text-purple-600 border-purple-600'} border-b-2`
+                : darkMode 
+                  ? 'text-gray-400'
+                  : 'text-gray-500'
+              }`}
+            >
+              Specifications
+            </button>
+            <button
+              onClick={() => setActiveTab("reviews")}
+              className={`px-4 py-2 font-medium ${activeTab === "reviews" 
+                ? `${darkMode ? 'text-purple-400 border-purple-400' : 'text-purple-600 border-purple-600'} border-b-2`
+                : darkMode 
+                  ? 'text-gray-400'
+                  : 'text-gray-500'
+              }`}
+            >
+              Reviews
+            </button>
+          </div>
+          
+          {/* Description tab */}
+          {activeTab === "description" && (
+            <div className="mb-6">
+              <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-6`}>{product.description}</p>
               
-              <button
-                onClick={handleAddToCart}
-                className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-xl"
-              >
-                <ShoppingBagIcon className="h-5 w-5" />
-                Add to Cart
-              </button>
+              <div className="flex items-center gap-4 mb-4">
+                <span className={`text-2xl font-bold ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>
+                  ${discountedPrice}
+                </span>
+                {isDiscounted && (
+                  <span className={`text-lg ${darkMode ? 'text-gray-400' : 'text-gray-500'} line-through`}>
+                    ${product.price}
+                  </span>
+                )}
+                {isDiscounted && (
+                  <span className={`${darkMode ? 'bg-red-900 text-red-200' : 'bg-red-100 text-red-800'} px-2 py-1 rounded text-sm`}>
+                    {product.discountPercentage}% off
+                  </span>
+                )}
+              </div>
+  
+              <div className="flex items-center gap-2 mb-4">
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    i < Math.floor(averageRating) ? (
+                      <StarSolid key={i} className="h-5 w-5 text-yellow-400" />
+                    ) : (
+                      <StarIcon key={i} className="h-5 w-5 text-gray-500" />
+                    )
+                  ))}
+                </div>
+                <span className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>
+                  ({averageRating} / 5.0) • {product.reviews?.length || 0} reviews
+                </span>
+              </div>
+  
+              <div className="flex flex-wrap gap-2 mb-6">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  product.stock > 0 
+                    ? darkMode 
+                      ? 'bg-green-900 text-green-200' 
+                      : 'bg-green-100 text-green-800'
+                    : darkMode 
+                      ? 'bg-red-900 text-red-200' 
+                      : 'bg-red-100 text-red-800'
+                }`}>
+                  {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+                </span>
+                <span className={`px-3 py-1 rounded-full ${darkMode ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800'} text-sm font-medium`}>
+                  {product.brand}
+                </span>
+                <span className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'} text-sm font-medium`}>
+                  {product.category}
+                </span>
+              </div>
             </div>
+          )}
+          
+          {/* Specifications tab */}
+          {activeTab === "specs" && (
+            <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <h4 className={`font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>General</h4>
+                <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
+                  <span className="font-medium">Brand:</span> {product.brand || 'N/A'}
+                </p>
+                <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
+                  <span className="font-medium">Model:</span> {product.model || 'N/A'}
+                </p>
+                <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
+                  <span className="font-medium">Category:</span> {product.category || 'N/A'}
+                </p>
+              </div>
+              <div className="space-y-3">
+                <h4 className={`font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Dimensions</h4>
+                <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
+                  <span className="font-medium">Size:</span> {formatDimensions(product.dimensions)}
+                </p>
+                {product.weight && (
+                  <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
+                    <span className="font-medium">Weight:</span> {product.weight}
+                  </p>
+                )}
+                {product.material && (
+                  <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
+                    <span className="font-medium">Material:</span> {product.material}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-3">
+                <h4 className={`font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Warranty</h4>
+                <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
+                  <span className="font-medium">Period:</span> {product.warranty || '1 year'}
+                </p>
+                <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
+                  <span className="font-medium">Returns:</span> Within 14 days
+                </p>
+              </div>
+              <div className="space-y-3">
+                <h4 className={`font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Shipping</h4>
+                <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
+                  <span className="font-medium">Time:</span> 2-3 business days
+                </p>
+                <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
+                  <span className="font-medium">Cost:</span> $5.00
+                </p>
+              </div>
+              {product.specifications && (
+                <div className="col-span-full mt-4">
+                  <h4 className={`font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>Additional Specifications</h4>
+                  {renderSpecifications(product.specifications)}
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Reviews tab */}
+          {activeTab === "reviews" && (
+            <div className="mb-6">
+              {product.reviews && product.reviews.length > 0 ? (
+                <div className="space-y-4">
+                  {product.reviews.map((review, index) => (
+                    <div key={index} className={`${darkMode ? 'bg-gray-700' : 'bg-gray-100'} p-4 rounded-lg`}>
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <p className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>{review.reviewerName || 'Anonymous'}</p>
+                          <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>
+                            {review.date ? new Date(review.date).toLocaleDateString() : 'No date'}
+                          </p>
+                        </div>
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            i < (review.rating || 0) ? (
+                              <StarSolid key={i} className="h-5 w-5 text-yellow-400" />
+                            ) : (
+                              <StarIcon key={i} className="h-5 w-5 text-gray-500" />
+                            )
+                          ))}
+                        </div>
+                      </div>
+                      <p className={darkMode ? 'text-gray-300' : 'text-gray-600'}>{review.comment || 'No review text'}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-center py-4`}>No reviews available</p>
+              )}
+            </div>
+          )}
+          
+          {/* Quantity selector */}
+          <div className="mb-8">
+            <div className="flex items-center gap-4">
+              <span className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} font-medium`}>Quantity:</span>
+              <div className={`flex items-center border ${darkMode ? 'border-gray-600' : 'border-gray-300'} rounded-lg overflow-hidden`}>
+                <button
+                  onClick={decreaseQuantity}
+                  className={`px-3 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'} transition disabled:opacity-40`}
+                  disabled={quantity <= 1}
+                >
+                  -
+                </button>
+                <span className={`px-4 py-2 text-center w-12 ${darkMode ? 'bg-gray-800 text-gray-200' : 'bg-white text-gray-700'}`}>
+                  {quantity}
+                </span>
+                <button
+                  onClick={increaseQuantity}
+                  className={`px-3 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'} transition disabled:opacity-40`}
+                  disabled={quantity >= (product.stock || 10)}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+  
+          {/* Action buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-8">
+            <button
+              onClick={handleBuyNow}
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-xl"
+            >
+              <BoltIcon className="h-5 w-5" />
+              Buy Now
+            </button>
+            
+            <button
+              onClick={handleAddToCart}
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-xl"
+            >
+              <ShoppingBagIcon className="h-5 w-5" />
+              Add to Cart
+            </button>
           </div>
         </div>
       </div>
     </div>
+  </div>
   );
 };
 

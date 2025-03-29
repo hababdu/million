@@ -11,3 +11,37 @@
   background-size: 200% 200%;
   animation: gradient-x 3s ease infinite;
 }
+
+/* Asosiy stil */
+body {
+    transition: background-color 0.3s ease;
+  }
+  
+  /* Dark mode uchun qo'shimcha stillar */
+  .dark {
+    color-scheme: dark;
+  }
+
+  /* Scrollbar ni yashirish */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  /* Mahsulot kartalari uchun moslashuvchan o'lcham */
+  .w-64 {
+    width: 16rem; /* 256px */
+    min-width: 16rem;
+  }
+  
+  /* Kichik ekranlar uchun moslashuvchanlik */
+  @media (max-width: 640px) {
+    .w-64 {
+      width: 12rem; /* 192px */
+      min-width: 12rem;
+    }
+  }
