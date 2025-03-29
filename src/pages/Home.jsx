@@ -21,13 +21,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import Mlogo from '../assets/mlogo.svg';
 
 const SORT_OPTIONS = [
-  { value: "default", label: "Standart tartib" },
+  { value: "default", label: "Tasodifiy tartib" },
   { value: "price-asc", label: "Arzon ➝ Qimmat" },
   { value: "price-desc", label: "Qimmat ➝ Arzon" },
   { value: "rating", label: "Reyting bo'yicha" },
   { value: "discount", label: "Chegirma foizi" },
 ];
 
+// Yangi va takomillashtirilgan shuffleArray funksiyasi
 const shuffleArray = (array) => {
   const newArray = [...array];
   for (let i = newArray.length - 1; i > 0; i--) {
@@ -37,6 +38,7 @@ const shuffleArray = (array) => {
   return newArray;
 };
 
+// Optimallashtirilgan ProductCard komponenti
 const ProductCard = React.memo(({ 
   product, 
   isInCart, 
@@ -54,7 +56,7 @@ const ProductCard = React.memo(({
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.3, type: "spring" }}
       whileHover={{ y: -5 }}
       className={`group relative rounded-xl shadow-lg overflow-hidden flex flex-col h-full ${
         darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-50'
@@ -63,13 +65,15 @@ const ProductCard = React.memo(({
       } transition-all duration-300 cursor-pointer`}
       onClick={() => onProductClick(product)}
     >
-      {/* Image container with fixed aspect ratio */}
-      <div className="relative pt-[75%] overflow-hidden"> {/* 4:3 aspect ratio */}
-        <img
+      <div className="relative pt-[75%] overflow-hidden">
+        <motion.img
           src={product.thumbnail}
           alt={product.title}
           className="absolute top-0 left-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
         />
         
         {product.discountPercentage > 0 && (
@@ -77,6 +81,7 @@ const ProductCard = React.memo(({
             className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold shadow-md"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
+            transition={{ delay: 0.2 }}
           >
             -{Math.round(product.discountPercentage)}%
           </motion.span>
@@ -90,6 +95,9 @@ const ProductCard = React.memo(({
             } shadow-md`}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
+            initial={{ x: 20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
           >
             <FaHeart className={isLiked ? "text-red-500" : darkMode ? "text-gray-300" : "text-gray-600"} />
           </motion.button>
@@ -105,13 +113,15 @@ const ProductCard = React.memo(({
             } shadow-md`}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
+            initial={{ x: 20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
           >
             <FaShoppingCart className={isInCart ? "text-white" : darkMode ? "text-gray-300" : "text-gray-600"} />
           </motion.button>
         </div>
       </div>
       
-      {/* Content section with consistent height */}
       <div className="p-4 flex flex-col flex-grow">
         <h3 className={`text-md font-semibold line-clamp-2 mb-2 ${
           darkMode ? 'text-white' : 'text-gray-900'
@@ -177,8 +187,9 @@ function Home() {
   const [sortOption, setSortOption] = useState("default");
   const [activeTab, setActiveTab] = useState("all");
   const [showSortMenu, setShowSortMenu] = useState(false);
+  const [randomSeed, setRandomSeed] = useState(Math.random());
 
-  // Scroll functions for categories
+  // Scroll funksiyalari
   const scrollContainerRef = React.useRef(null);
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -196,13 +207,17 @@ function Home() {
     dispatch(fetchProducts());
   }, [dispatch]);
 
+  // Kategoriyalarni random tartibda olish
   const allCategories = useMemo(() => {
-    return shuffleArray([...new Set(products.map(p => p.category))]);
-  }, [products]);
+    const categories = [...new Set(products.map(p => p.category))];
+    return shuffleArray(categories);
+  }, [products, randomSeed]);
 
+  // Mahsulotlarni qayta ishlash va random tartiblash
   const processedProducts = useMemo(() => {
     let result = [...products];
 
+    // Qidiruv bo'yicha filtr
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(p => 
@@ -212,12 +227,15 @@ function Home() {
       );
     }
 
+    // Kategoriya bo'yicha filtr
     if (selectedCategories.length > 0) {
       result = result.filter(p => selectedCategories.includes(p.category));
     }
 
+    // Narx oralig'i bo'yicha filtr
     result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
 
+    // Tartiblash variantlari
     switch (sortOption) {
       case "price-asc":
         result.sort((a, b) => a.price - b.price);
@@ -232,25 +250,27 @@ function Home() {
         result.sort((a, b) => b.discountPercentage - a.discountPercentage);
         break;
       default:
+        // Standart holatda random tartib
+        result = shuffleArray(result);
         break;
     }
 
+    // Kategoriyalar bo'yicha guruhlash
     const grouped = {};
-    result.forEach(product => {
-      if (!grouped[product.category]) {
-        grouped[product.category] = [];
-      }
-      grouped[product.category].push(product);
+    shuffleArray([...new Set(result.map(p => p.category))]).forEach(category => {
+      grouped[category] = shuffleArray(result.filter(p => p.category === category));
     });
 
     return grouped;
-  }, [products, searchQuery, selectedCategories, priceRange, sortOption]);
+  }, [products, searchQuery, selectedCategories, priceRange, sortOption, randomSeed]);
 
+  // Mahsulotni ko'rish funksiyasi
   const handleProductClick = useCallback((product) => {
     dispatch(addViewedProduct(product));
     navigate("/full", { state: { product } });
   }, [dispatch, navigate]);
 
+  // Savatchaga qo'shish funksiyasi
   const handleAddToCart = useCallback((e, product) => {
     e.stopPropagation();
     dispatch(addToCart({
@@ -269,6 +289,7 @@ function Home() {
     });
   }, [dispatch, darkMode]);
 
+  // Sevimlilarga qo'shish funksiyasi
   const handleLikeToggle = useCallback((e, productId) => {
     e.stopPropagation();
     dispatch(toggleLike(productId));
@@ -283,6 +304,7 @@ function Home() {
     }
   }, [dispatch, likedProducts, darkMode]);
 
+  // Kategoriyani tanlash/olib tashlash
   const toggleCategory = useCallback((category) => {
     setSelectedCategories(prev =>
       prev.includes(category)
@@ -291,12 +313,14 @@ function Home() {
     );
   }, []);
 
+  // Filtrlarni tozalash
   const resetFilters = useCallback(() => {
     setSearchQuery("");
     setPriceRange([0, 2000]);
     setSelectedCategories([]);
     setSortOption("default");
     setActiveTab("all");
+    setRandomSeed(Math.random()); // Yangi random tartib yaratish
     toast.success('Barcha filtrlarni tozalandi', {
       position: 'top-right',
       style: {
@@ -306,6 +330,7 @@ function Home() {
     });
   }, [darkMode]);
 
+  // Yuklash holati
   if (loading) {
     return (
       <div className={`min-h-screen py-12 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -332,6 +357,7 @@ function Home() {
     );
   }
 
+  // Xatolik holati
   if (error) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -356,7 +382,7 @@ function Home() {
       transition={{ duration: 0.5 }}
       className={`min-h-screen mx-auto px-4 py-8 max-w-7xl ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}
     >
-      {/* Search and Filter Section */}
+      {/* Qidiruv va Filtr bo'limi */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <motion.h1 
           initial={{ x: -20 }}
@@ -444,7 +470,7 @@ function Home() {
         </div>
       </div>
 
-      {/* Filter Panel */}
+      {/* Filtr paneli */}
       <AnimatePresence>
         {showFilters && (
           <motion.div
@@ -525,7 +551,7 @@ function Home() {
         )}
       </AnimatePresence>
 
-      {/* Categories Scroll */}
+      {/* Kategoriyalar menyusi */}
       <div className="relative mb-8">
         <div className="absolute left-0 top-0 bottom-0 flex items-center z-10">
           <button
@@ -575,7 +601,7 @@ function Home() {
         </div>
       </div>
 
-      {/* Products Display */}
+      {/* Mahsulotlarni ko'rsatish */}
       {Object.keys(processedProducts).length === 0 ? (
         <motion.div
           initial={{ opacity: 0 }}
@@ -597,76 +623,79 @@ function Home() {
         </motion.div>
       ) : (
         <div className="space-y-12">
-          {(activeTab === "all" ? Object.keys(processedProducts) : [activeTab]).map(category => (
-            <motion.section 
-              key={category}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="category-section"
-            >
-              <div className="flex justify-between items-center mb-6">
-                <h2 className={`text-2xl font-bold capitalize ${
-                  darkMode ? 'text-white' : 'text-gray-900'
-                }`}>
-                  {category}
-                </h2>
-                <button
-                  onClick={() => navigate('/browse', { state: { category } })}
-                  className={`flex items-center text-sm ${
-                    darkMode ? 'text-purple-400 hover:text-purple-300' : 'text-purple-600 hover:text-purple-700'
-                  } font-medium`}
-                >
-                  Barchasini ko'rish <FaChevronRight className="ml-1" />
-                </button>
-              </div>
-              
-              {/* Horizontally scrollable product cards */}
-              <div className="relative">
-                <button 
-                  onClick={() => document.getElementById(`product-scroll-${category}`).scrollBy({ left: -300, behavior: 'smooth' })}
-                  className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full ${
-                    darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-100'
-                  } shadow-md`}
-                >
-                  <FaChevronLeft className={darkMode ? 'text-gray-300' : 'text-gray-600'} />
-                </button>
-                
-                <div 
-                  id={`product-scroll-${category}`}
-                  className="flex overflow-x-auto scrollbar-hide space-x-6 pb-4 -mx-4 px-4"
-                  style={{ scrollSnapType: 'x mandatory' }}
-                >
-                  {processedProducts[category].slice(0, 10).map(product => (
-                    <div 
-                      key={product.id} 
-                      className="flex-shrink-0 w-64"
-                      style={{ scrollSnapAlign: 'start' }}
-                    >
-                      <ProductCard 
-                        product={product}
-                        isInCart={cartItems.some(item => item.id === product.id)}
-                        isLiked={likedProducts.includes(product.id)}
-                        onProductClick={handleProductClick}
-                        onAddToCart={handleAddToCart}
-                        onLikeToggle={handleLikeToggle}
-                        darkMode={darkMode}
-                      />
-                    </div>
-                  ))}
+          <AnimatePresence>
+            {(activeTab === "all" ? Object.keys(processedProducts) : [activeTab]).map(category => (
+              <motion.section 
+                key={category}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4 }}
+                className="category-section"
+              >
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className={`text-2xl font-bold capitalize ${
+                    darkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    {category}
+                  </h2>
+                  <button
+                    onClick={() => navigate('/browse', { state: { category } })}
+                    className={`flex items-center text-sm ${
+                      darkMode ? 'text-purple-400 hover:text-purple-300' : 'text-purple-600 hover:text-purple-700'
+                    } font-medium`}
+                  >
+                    Barchasini ko'rish <FaChevronRight className="ml-1" />
+                  </button>
                 </div>
                 
-                <button 
-                  onClick={() => document.getElementById(`product-scroll-${category}`).scrollBy({ left: 300, behavior: 'smooth' })}
-                  className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full ${
-                    darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-100'
-                  } shadow-md`}
-                >
-                  <FaChevronRight className={darkMode ? 'text-gray-300' : 'text-gray-600'} />
-                </button>
-              </div>
-            </motion.section>
-          ))}
+                {/* Gorizontal aylantiriladigan mahsulot kartalari */}
+                <div className="relative">
+                  <button 
+                    onClick={() => document.getElementById(`product-scroll-${category}`).scrollBy({ left: -300, behavior: 'smooth' })}
+                    className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full ${
+                      darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-100'
+                    } shadow-md`}
+                  >
+                    <FaChevronLeft className={darkMode ? 'text-gray-300' : 'text-gray-600'} />
+                  </button>
+                  
+                  <div 
+                    id={`product-scroll-${category}`}
+                    className="flex overflow-x-auto scrollbar-hide space-x-6 pb-4 -mx-4 px-4"
+                    style={{ scrollSnapType: 'x mandatory' }}
+                  >
+                    {processedProducts[category].slice(0, 10).map(product => (
+                      <div 
+                        key={product.id} 
+                        className="flex-shrink-0 w-64"
+                        style={{ scrollSnapAlign: 'start' }}
+                      >
+                        <ProductCard 
+                          product={product}
+                          isInCart={cartItems.some(item => item.id === product.id)}
+                          isLiked={likedProducts.includes(product.id)}
+                          onProductClick={handleProductClick}
+                          onAddToCart={handleAddToCart}
+                          onLikeToggle={handleLikeToggle}
+                          darkMode={darkMode}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <button 
+                    onClick={() => document.getElementById(`product-scroll-${category}`).scrollBy({ left: 300, behavior: 'smooth' })}
+                    className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full ${
+                      darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-white hover:bg-gray-100'
+                    } shadow-md`}
+                  >
+                    <FaChevronRight className={darkMode ? 'text-gray-300' : 'text-gray-600'} />
+                  </button>
+                </div>
+              </motion.section>
+            ))}
+          </AnimatePresence>
         </div>
       )}
     </motion.div>
