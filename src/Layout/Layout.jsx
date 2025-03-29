@@ -398,26 +398,13 @@ function Layout({ children }) {
               </div>
             )}
 
-            {/* Categories */}
-            <div className="mt-3 overflow-x-auto whitespace-nowrap scrollbar-hide">
-              <div className="inline-flex space-x-2">
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => handleCategoryClick(category)}
-                    className="px-4 py-1.5 bg-gray-700 text-white text-sm rounded-full hover:bg-purple-600 transition"
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
-            </div>
+           
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow pt-32 pb-16 md:pb-0 px-4 container mx-auto">
+      <main className="flex-grow pt-15 pb-16 md:pb-0 px-4 container mx-auto">
         {children}
       </main>
 
